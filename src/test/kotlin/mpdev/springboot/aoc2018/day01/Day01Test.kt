@@ -36,6 +36,6 @@ class Day01Test {
     @Test
     @Order(2)
     fun `Solves Part 2`() {
-        assertThat(puzzleSolver.solvePart2().result).isEqualTo("241861950")
+        assertThat(puzzleSolver.solvePart2().result).isEqualTo("2")
     }
 }

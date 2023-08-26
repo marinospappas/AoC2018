@@ -2,7 +2,6 @@ package mpdev.springboot.aoc2018.solutions.day01
 
 import mpdev.springboot.aoc2018.model.PuzzlePartSolution
 import mpdev.springboot.aoc2018.solutions.PuzzleSolver
-import mpdev.springboot.aoc2018.utils.get2SumComponents
 import org.springframework.stereotype.Component
 import kotlin.system.measureNanoTime
 
@@ -18,11 +17,11 @@ class Day01: PuzzleSolver() {
     }
 
     var result = 0
-    lateinit var intList: List<Int>
+    lateinit var intList: IntArray
 
     override fun initSolver(): Pair<Long,String> {
         val elapsed = measureNanoTime {
-            intList = inputData.map { Integer.parseInt(it) }
+            intList = IntArray(inputData.size) { Integer.parseInt(inputData[it]) }
         }
         return Pair(elapsed/1000, "micro-sec")
     }
@@ -36,15 +35,22 @@ class Day01: PuzzleSolver() {
 
     override fun solvePart2(): PuzzlePartSolution {
         val elapsed = measureNanoTime {
-            for (i in intList) {
-                val (first, second) = get2SumComponents(intList - setOf(i), 2020-i)
-                if (first >= 0) {
-                    result = i * first * second
-                    break
-                }
-            }
+            result = applyChangeAndFindDuplicate()
         }
         return PuzzlePartSolution(2, result.toString(), elapsed/1000, "micro-sec")
     }
 
+    fun applyChangeAndFindDuplicate(): Int {
+        val freqSet = mutableSetOf<Int>()
+        var freq = 0
+        var index = 0
+        while (true) {
+            freq += intList[index++]
+            if (freqSet.contains(freq))
+                return freq
+            freqSet.add(freq)
+            if (index > intList.lastIndex)
+                index = 0
+        }
+    }
 }
