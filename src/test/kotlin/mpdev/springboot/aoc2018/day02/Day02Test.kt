@@ -34,7 +34,7 @@ class Day02Test {
     }
 
     @Test
-    @Order(2)
+    @Order(3)
     fun `Solves Part 2`() {
         puzzleSolver.inputData = listOf(
             "abcde",

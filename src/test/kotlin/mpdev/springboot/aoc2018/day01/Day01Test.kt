@@ -34,7 +34,7 @@ class Day01Test {
     }
 
     @Test
-    @Order(2)
+    @Order(3)
     fun `Solves Part 2`() {
         assertThat(puzzleSolver.solvePart2().result).isEqualTo("2")
     }
