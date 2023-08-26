@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/aoc2020")
+@RequestMapping("/aoc2018")
 class RestApiController(@Autowired var puzzleSolvers: Map<Int,PuzzleSolver>) {
 
     @GetMapping("/day/{day}", produces = ["application/json"])
