@@ -32,11 +32,14 @@ class Day03Test {
     @Order(2)
     fun `Reads Input and sets Claims list`() {
         val fabric = Fabric(inputLines)
-        fabric.claims.forEach { k, v ->  println("claim $k:"); v.print() }
+        fabric.claims.forEach { (k, v) ->  println("claim $k: $v") }
         assertThat(fabric.claims.size).isEqualTo(3)
-        assertThat(fabric.claims[1]!!.getDimensions()).isEqualTo(Pair(4,4))
-        assertThat(fabric.claims[2]!!.getDimensions()).isEqualTo(Pair(4,4))
-        assertThat(fabric.claims[3]!!.getDimensions()).isEqualTo(Pair(2,2))
+        assertThat(fabric.claims[1]!!.x2 - fabric.claims[1]!!.x1).isEqualTo(4)
+        assertThat(fabric.claims[1]!!.y2 - fabric.claims[1]!!.y1).isEqualTo(4)
+        assertThat(fabric.claims[2]!!.x2 - fabric.claims[2]!!.x1).isEqualTo(4)
+        assertThat(fabric.claims[2]!!.y2 - fabric.claims[2]!!.y1).isEqualTo(4)
+        assertThat(fabric.claims[3]!!.x2 - fabric.claims[3]!!.x1).isEqualTo(2)
+        assertThat(fabric.claims[3]!!.y2 - fabric.claims[3]!!.y1).isEqualTo(2)
     }
 
     @Test

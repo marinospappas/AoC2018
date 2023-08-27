@@ -1,37 +1,43 @@
 package mpdev.springboot.aoc2018.solutions.day03
 
 import mpdev.springboot.aoc2018.utils.AocException
-import mpdev.springboot.aoc2018.utils.Grid
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.awt.Point
+import kotlin.math.min
+import kotlin.math.max
 
 class Fabric(input: List<String>) {
 
-    val claims = mutableMapOf<Int,Grid<FabricPoint>>()
+    private val log: Logger = LoggerFactory.getLogger(this::class.java)
+
+    val claims = mutableMapOf<Int,Claim>()
 
     init {
         processInput(input)
     }
 
     fun findOverlappingPoints(): Set<Point> {
+        log.info("starting overlapping calculation")
         val overlappingList = mutableListOf<Set<Point>>()
-        val claimsGrids = claims.values.toList()
-        for (i in 0 .. claimsGrids.lastIndex-1)
-            for (j in i+1 .. claimsGrids.lastIndex) {
-                val overlap = overlappingPoints(claimsGrids[i], claimsGrids[j])
+        val claimsData = claims.values.toList()
+        for (i in 0 .. claimsData.lastIndex-1)
+            for (j in i+1 .. claimsData.lastIndex) {
+                val overlap = overlappingPoints(claimsData[i], claimsData[j])
                 if (overlap.isNotEmpty())
                     overlappingList.add(overlap)
             }
-        return overlappingList.fold(setOf()) { acc, points -> acc union points }
+        return mutableSetOf<Point>().also { set -> overlappingList.forEach { set.addAll(it) } }
     }
 
     fun findNonOverlappingClaim(): Int {
-        val claimsGrids = claims.values.toList()
-        for (i in 0 .. claimsGrids.lastIndex) {
+        val claimsData = claims.values.toList()
+        for (i in 0 .. claimsData.lastIndex) {
             var overlaps = false
-            for (j in 0..claimsGrids.lastIndex) {
+            for (j in 0..claimsData.lastIndex) {
                 if (i == j)
                     continue
-                val overlap = overlappingPoints(claimsGrids[i], claimsGrids[j])
+                val overlap = overlappingPoints(claimsData[i], claimsData[j])
                 if (overlap.isNotEmpty()) {
                     overlaps = true
                     break
@@ -43,8 +49,25 @@ class Fabric(input: List<String>) {
         return -1
     }
 
-    private fun overlappingPoints(grid1: Grid<FabricPoint>, grid2: Grid<FabricPoint>) =
-        grid1.getDataPoints().keys intersect grid2.getDataPoints().keys
+    private fun overlappingPoints(claim1: Claim, claim2: Claim): Set<Point> {
+        val overlapping = mutableSetOf<Point>()
+        val x01 = claim1.x1
+        val y01 = claim1.y1
+        val x02 = claim1.x2
+        val y02 = claim1.y2
+        val x11 = claim2.x1
+        val y11 = claim2.y1
+        val x12 = claim2.x2
+        val y12 = claim2.y2
+        val xOverlap = min(x02,x12) - max(x01,x11)
+        val yOverlap = min(y02,y12) - max(y01,y11)
+        if (xOverlap > 0 && yOverlap > 0) {
+            for (x in max(x01,x11) until min(x02,x12))
+                for (y in max(y01,y11) until min(y02,y12))
+                    overlapping.add(Point(x,y))
+        }
+        return overlapping
+    }
 
     private fun processInput(input: List<String>) {
         input.forEach { line -> createClaim(line) }
@@ -55,13 +78,7 @@ class Fabric(input: List<String>) {
         val match = Regex("""#(\d+) @ (\d+),(\d+): (\d+)x(\d+)""").find(s)
         try {
             val (id, x0, y0, width, height) = match!!.destructured
-            val gridData = mutableMapOf<Point,FabricPoint>()
-            (0 until width.toInt()).forEach { w ->
-                (0 until height.toInt()).forEach { h ->
-                    gridData[Point(x0.toInt()+w, y0.toInt()+h)] = FabricPoint.CLAIMED
-                }
-            }
-            claims[id.toInt()] = Grid(gridData, FabricPoint.mapper)
+            claims[id.toInt()] = Claim(x0.toInt(), y0.toInt(), x0.toInt()+width.toInt(), y0.toInt()+height.toInt())
         } catch (e: Exception) {
             throw AocException("bad input line $s")
         }
@@ -69,11 +86,4 @@ class Fabric(input: List<String>) {
 
 }
 
-enum class FabricPoint(val value: Char) {
-    CLAIMED('#');
-    //FREE('.');
-
-    companion object {
-        val mapper: Map<Char,FabricPoint> = values().associateBy { it.value }
-    }
-}
+data class Claim(val x1: Int, val y1: Int, val x2: Int, val y2: Int)
