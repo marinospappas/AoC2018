@@ -1,4 +1,4 @@
-package mpdev.springboot.aoc2018.solutions.day04
+package mpdev.springboot.aoc2018.solutions.day05
 
 import mpdev.springboot.aoc2018.model.PuzzlePartSolution
 import mpdev.springboot.aoc2018.solutions.PuzzleSolver
@@ -6,10 +6,10 @@ import org.springframework.stereotype.Component
 import kotlin.system.measureTimeMillis
 
 @Component
-class Day04: PuzzleSolver() {
+class Day05: PuzzleSolver() {
 
     final override fun setDay() {
-        day = 4
+        day = 5
     }
 
     init {
@@ -17,30 +17,28 @@ class Day04: PuzzleSolver() {
     }
 
     var result = 0
-    lateinit var timetable: Timetable
+    lateinit var polymer: Polymer
 
     override fun initSolver(): Pair<Long,String> {
         val elapsed = measureTimeMillis {
-            timetable = Timetable(inputData)
+            polymer = Polymer(inputData)
         }
         return Pair(elapsed, "milli-sec")
     }
 
     override fun solvePart1(): PuzzlePartSolution {
         val elapsed = measureTimeMillis {
-            val guardId = timetable.findGuardMostAsleep()
-            val minuteMostLikely = timetable.findMinuteMostFrequentlyAsleep(guardId)
-            log.info("part 1. guard most asleep $guardId most likely at minute $minuteMostLikely")
-            result = guardId * minuteMostLikely
+            polymer.reducedData = polymer.doReaction(polymer.data)
+            result = polymer.reducedData.length
         }
         return PuzzlePartSolution(1, result.toString(), elapsed)
     }
 
     override fun solvePart2(): PuzzlePartSolution {
         val elapsed = measureTimeMillis {
-            val (guardMostAsleep, minuteMostAsleep) = timetable.findGuardMostFreqAsleepOnMinute()
-            log.info("part 2. guard most asleep $guardMostAsleep most likely at minute $minuteMostAsleep")
-            result = guardMostAsleep * minuteMostAsleep
+            // uses the improved polymer saved in part 1
+            result = polymer.removeElementAndDoReaction().values.minOfOrNull { it.length } ?: Int.MAX_VALUE
+
         }
         return PuzzlePartSolution(2, result.toString(), elapsed)
     }
