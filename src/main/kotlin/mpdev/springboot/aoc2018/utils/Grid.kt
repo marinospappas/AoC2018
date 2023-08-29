@@ -2,7 +2,7 @@ package mpdev.springboot.aoc2018.utils
 
 import java.awt.Point
 
-open class Grid<T>(input: List<String> = emptyList(), private val mapper: Map<Char,T>) {
+open class Grid<T>(inputGridVisual: List<String> = emptyList(), private val mapper: Map<Char,T>) {
 
     protected var data = mutableMapOf<Point,T>()
     protected var maxX: Int = 0
@@ -11,22 +11,27 @@ open class Grid<T>(input: List<String> = emptyList(), private val mapper: Map<Ch
     protected var minY: Int = 0
 
     init {
-        if (input.isNotEmpty()) {
-            processInput(input)
+        if (inputGridVisual.isNotEmpty()) {
+            processInputVisual(inputGridVisual)
             updateXYDimensions()
         }
     }
 
-    constructor(gridData: Map<Point,T>,  mapper: Map<Char,T>): this(mapper = mapper) {
+    constructor(gridData: Map<Point,T>, mapper: Map<Char,T>): this(mapper = mapper) {
         data = gridData.toMutableMap()
         updateXYDimensions()
     }
 
+    constructor(inputGridXY: Set<String>, mapper: Map<Char,T>): this(mapper = mapper) {
+        processInputXY(inputGridXY)
+        updateXYDimensions()
+    }
+
     private fun updateXYDimensions() {
-        maxX = data.keys.maxOf { it.x }
-        maxY = data.keys.maxOf { it.y }
-        minX = data.keys.minOf { it.x }
-        minY = data.keys.minOf { it.y }
+        maxX = data.keys.maxOf { it.x } + 1
+        maxY = data.keys.maxOf { it.y } + 1
+        minX = data.keys.minOf { it.x } - 1
+        minY = data.keys.minOf { it.y } - 1
     }
 
     fun getDataPoints() = data.toMap()
@@ -36,6 +41,7 @@ open class Grid<T>(input: List<String> = emptyList(), private val mapper: Map<Ch
     }
 
     fun getDimensions() = Pair(maxX-minX+1, maxY-minY+1)
+    fun getMinMaxXY() = FourComponents(minX, maxX, minY, maxY)
     fun countOf(item: T) = data.values.count { it == item }
 
     open fun updateDimensions() {
@@ -58,12 +64,19 @@ open class Grid<T>(input: List<String> = emptyList(), private val mapper: Map<Ch
             16_777_216, 33_554_432, 67_108_864, 134_217_728, 268_435_456, 536_870_912, 1_073_741_824 )
     }
 
-    private fun processInput(input: List<String>) {
+    private fun processInputVisual(input: List<String>) {
         input.indices.forEach { y ->
             input[y].indices.forEach { x ->
                 if (mapper[input[y][x]] != null)
                     data[Point(x, y)] = mapper[input[y][x]]!!
             }
+        }
+    }
+
+    private fun processInputXY(input: Set<String>) {
+        input.forEach { s ->
+            val (x, y) = s.split(",")
+            data[Point(x.trim().toInt(), y.trim().toInt())] = mapper.values.first()
         }
     }
 
@@ -73,7 +86,8 @@ open class Grid<T>(input: List<String> = emptyList(), private val mapper: Map<Ch
         return grid
     }
 
-    protected fun map2Char(t: T) = mapper.entries.first { e -> e.value == t }.key
+    protected fun map2Char(t: T) = mapper.entries.firstOrNull { e -> e.value == t }?.key ?:
+        if (t is Int) '0' + t%10 else 'x'
 
     open fun print() {
         printGrid(data2Grid())
@@ -95,4 +109,7 @@ open class Grid<T>(input: List<String> = emptyList(), private val mapper: Map<Ch
             print(i%10)
         println()
     }
+
 }
+
+data class FourComponents(val x1: Int, val x2: Int, val x3: Int, val x4: Int)
