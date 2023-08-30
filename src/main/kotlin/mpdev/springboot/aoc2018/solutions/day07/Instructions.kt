@@ -8,6 +8,7 @@ class Instructions(input: List<String>) {
     companion object {
         val TIME_SPENT_TEST = IntArray(26) { it + 1 }
         const val WORKERS_TEST = 2
+        const val IDLE = ' '
     }
 
     val graph = mutableMapOf<Char,Step>()
@@ -52,7 +53,6 @@ class Instructions(input: List<String>) {
 
     // part 2
     fun topologicalSortBfsMultiTasking(start: List<Char>): Pair<String,Int> {
-        val IDLE = ' '
         val result = mutableListOf<Char>()
         val queue = PriorityQueue<Char>().also { it.addAll(start) }
         val visited = mutableListOf<Char>().also { it.addAll(start) }
@@ -67,7 +67,7 @@ class Instructions(input: List<String>) {
                     timeToComplete[i] = clock + timeSpent[ current[i] - 'A' ] - 1
                 }
             }
-            // if a task has been completed then mark it and take the necessary actions
+            // if a task has been completed then mark it and take the necessary actions (get the next tasks, put them in the queue, etc)
             (0 until workers).forEach { i ->
                 if (current[i] != IDLE && timeToComplete[i] == clock) {
                     val completedId = current[i]
@@ -93,15 +93,11 @@ class Instructions(input: List<String>) {
             val match = Regex("""Step ([A-Z]) must be finished before step ([A-Z]) can begin.""").find(s)
             try {
                 val (step1Id, step2Id) = match!!.destructured
-                if (graph[step1Id.first()] == null)
-                    graph[step1Id.first()] = Step(step1Id.first(), next = mutableListOf(step2Id.first()))
-                else
-                    graph[step1Id.first()]!!.next.add(step2Id.first())
+                graph.putIfAbsent(step1Id.first(), Step(step1Id.first()))
+                graph[step1Id.first()]!!.next.add(step2Id.first())
                 // also update reverse dependencies
-                if (revDependenciesMap[step2Id.first()] == null)
-                    revDependenciesMap[step2Id.first()] = mutableListOf(step1Id.first())
-                else
-                    revDependenciesMap[step2Id.first()]!!.add(step1Id.first())
+                revDependenciesMap.putIfAbsent(step2Id.first(), mutableListOf())
+                revDependenciesMap[step2Id.first()]!!.add(step1Id.first())
             } catch (e: Exception) {
                 throw AocException("bad input line $s")
             }
