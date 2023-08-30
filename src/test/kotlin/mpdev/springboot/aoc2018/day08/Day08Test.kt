@@ -36,6 +36,9 @@ class Day08Test {
         var numNodes = 0
         tree.traverseTree(tree.dataRoot) { _,_ -> ++numNodes }
         assertThat(numNodes).isEqualTo(4)
+        assertThat(tree.dataRoot.noOfChildren).isEqualTo(2)
+        assertThat(tree.dataRoot.sizeOfMetadata).isEqualTo(3)
+        assertThat(tree.dataRoot.metadata).isEqualTo(listOf(1,1,2))
     }
 
     @Test

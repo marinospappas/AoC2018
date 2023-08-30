@@ -2,7 +2,7 @@ package mpdev.springboot.aoc2018.solutions.day08
 
 class Tree(input: List<String>) {
 
-    var nodeId = 0
+    private var nodeId = 0
     val dataRoot = Node(nodeId++)
 
     init {
@@ -23,15 +23,15 @@ class Tree(input: List<String>) {
     }
 
     private fun traverseTree2(node: Node): Int {
-        if (node.noOfChildren == 0)
-            return node.metadata.sum()
+        return if (node.noOfChildren == 0)
+            node.metadata.sum()
         else {
             var thisSum = 0
             node.metadata.forEach { i ->
                 if (i in 1 .. node.noOfChildren)
                     thisSum += traverseTree2(node.children[i-1])
             }
-            return thisSum
+            thisSum
         }
     }
 
@@ -40,14 +40,8 @@ class Tree(input: List<String>) {
     }
 
     private fun printNode(node: Node) {
-        traverseTree(node) { n,i -> (0..(4*i)).forEach { print(" ") }; println(n) }
+        traverseTree(node) { n,i -> (0..(4*i)).forEach { _ -> print(" ") }; println(n) }
     }
-    /*
-        println("${indent}$node")
-        node.children.forEach { child -> printNode(child, "$indent    ") }
-    }
-
-     */
 
     private fun processInput(node: Node, input: MutableList<Int>) {
         var noOfChildren = input[0]
