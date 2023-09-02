@@ -42,8 +42,7 @@ class MarbleGame(input: List<String>) {
     }
 
     fun playMarble() {
-        if (++curPlayer > numberOfPlayers)
-            curPlayer = 1
+        (++curPlayer).also { if (curPlayer > numberOfPlayers) curPlayer = 1 }
         if (++idPlayed % 23 == 0)
             playMarble23()
         else
