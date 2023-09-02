@@ -35,7 +35,7 @@ class Message(input: List<String>) {
     }
 
     fun print() {
-        Grid(Array(msgData.size) { msgData[it].currentPos }, Coordinates.mapper).print()
+        Grid(Array(msgData.size) { msgData[it].currentPos }, mapper).print()
     }
 
     private fun processInput(input: List<String>) {

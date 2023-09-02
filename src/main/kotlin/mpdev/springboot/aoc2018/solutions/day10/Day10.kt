@@ -28,10 +28,12 @@ class Day10: PuzzleSolver() {
 
     override fun solvePart1(): PuzzlePartSolution {
         val elapsed = measureTimeMillis {
+            var count = 0
             while (!message.msgAppeared()) {
+                println(++count)
                 message.doMovement()
-                message.print()
             }
+            message.print()
         }
         return PuzzlePartSolution(1, result, elapsed)
     }
