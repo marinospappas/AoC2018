@@ -40,6 +40,8 @@ fun String.splitRepeatedChars(): List<String> {
 
 fun Int.lastDigit() = this % 10
 
+fun Int.numOfDigits() = abs(this).toString().length
+
 operator fun IntArray.plus(other: IntArray) = Array(size) { this[it] + other[it] }.toIntArray()
 
 fun Array<IntRange>.allValues(): Set<MutableList<Int>> {

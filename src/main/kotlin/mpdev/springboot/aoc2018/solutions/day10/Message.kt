@@ -1,35 +1,43 @@
 package mpdev.springboot.aoc2018.solutions.day10
 
-import mpdev.springboot.aoc2018.solutions.day06.Coordinates
 import mpdev.springboot.aoc2018.utils.AocException
 import mpdev.springboot.aoc2018.utils.Grid
 import mpdev.springboot.aoc2018.utils.plus
+import mpdev.springboot.aoc2018.utils.times
 import java.awt.Point
 
 class Message(input: List<String>) {
 
     val msgData = mutableListOf<MessagePoint>()
+    var minX: Int = 0
+    var maxX: Int = 0
+    var minY: Int = 0
+    var maxY: Int = 0
+
     init {
         processInput(input)
+        calculateMinMaxCoords()
     }
 
-    fun doMovement() {
-        msgData.forEach { point ->
-            point.currentPos += point.velocity
-        }
+    fun calculateMinMaxCoords() {
+        minX = msgData.minOf { it.currentPos.x }
+        maxX = msgData.maxOf { it.currentPos.x }
+        minY = msgData.minOf { it.currentPos.y }
+        maxY = msgData.maxOf { it.currentPos.y }
     }
 
-    fun msgAppeared(): Boolean {
-        msgData.forEach { p ->
-            var msgOn = true
-            for (i in 1..4) {
-                if (!msgData.map{it.currentPos}.contains(p.currentPos + Point(p.currentPos.x, p.currentPos.y+i))) {
-                    msgOn = false
-                    break
-                }
-            }
-            if (msgOn)
-                return true
+    fun doMovement(factor: Int = 1): Boolean {
+        val dimX = maxX - minX
+        val dimY = maxY - minY
+        val newPts = mutableListOf<Point>()
+        msgData.forEach { point -> newPts.add(point.currentPos + point.velocity.times(factor)) }
+        val newDimX = newPts.maxOf { it.x } - newPts.minOf { it.x }
+        val newDimY = newPts.maxOf { it.y } - newPts.minOf { it.y }
+        if (newDimX < dimX && newDimY < dimY) {     // if the grid shrank, update new positions and return true
+            for (i in newPts.indices)
+                msgData[i].currentPos = newPts[i]
+            calculateMinMaxCoords()
+            return true
         }
         return false
     }
@@ -55,7 +63,6 @@ class Message(input: List<String>) {
         const val DATA_VALUE = -1
         val mapper = mapOf('#' to DATA_VALUE)
     }
-
 }
 
 data class MessagePoint(val initialPos: Point, val velocity: Point, var currentPos: Point) {

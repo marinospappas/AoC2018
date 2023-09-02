@@ -1,10 +1,8 @@
 package mpdev.springboot.aoc2018.day10
 
 import mpdev.springboot.aoc2018.input.InputDataReader
-import mpdev.springboot.aoc2018.solutions.day06.Coordinates
 import mpdev.springboot.aoc2018.solutions.day10.Day10
 import mpdev.springboot.aoc2018.solutions.day10.Message
-import mpdev.springboot.aoc2018.utils.Grid
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Order
@@ -47,9 +45,10 @@ class Day10Test {
         val message = Message(inputLines)
         println("initial state")
         message.print()
-        repeat(5) {
+        repeat(4) {
             println(it+1)
-            message.doMovement()
+            val gridShrank = message.doMovement()
+            println("grind shrank: $gridShrank")
             message.print()
         }
     }
@@ -57,13 +56,15 @@ class Day10Test {
     @Test
     @Order(4)
     fun `Solves Part 1`() {
-        assertThat(puzzleSolver.solvePart1().result).isEqualTo("")
+        assertThat(puzzleSolver.solvePart1().result).isEqualTo("message in logfile")
     }
 
     @Test
     @Order(7)
     fun `Solves Part 2`() {
-        assertThat(puzzleSolver.solvePart2().result).isEqualTo("")
+        puzzleSolver.initSolver()
+        puzzleSolver.solvePart1()
+        assertThat(puzzleSolver.solvePart2().result).isEqualTo("3")
     }
 
 }
