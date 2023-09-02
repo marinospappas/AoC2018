@@ -51,11 +51,11 @@ class Day09Test {
     @Order(3)
     fun `Plays next marble`() {
         val marbleGame = MarbleGame(inputLines)
+        println("initial setup for first 2 rounds")
         marbleGame.print()
-        var count = 2
         while(marbleGame.idPlayed < marbleGame.maxMarbleId) {
-            println(count++)
             marbleGame.playMarble()
+            println("cur player ${marbleGame.curPlayer}")
             marbleGame.print()
         }
         assertThat(marbleGame.scoreMap.values.max()).isEqualTo(32)
@@ -73,9 +73,12 @@ class Day09Test {
     @Test
     @Order(7)
     fun `Solves Part 2`() {
-        assertThat(puzzleSolver.solvePart2().result).isEqualTo("")
+        puzzleSolver.inputData = listOf(inputLines[2])
+        puzzleSolver.initSolver()
+        assertThat(puzzleSolver.solvePart2().result).isEqualTo("1406506154")
     }
-     fun inputProvider(): Stream<Arguments> {
-         return inputLines.map{ s -> Arguments.of(s) }.stream()
-     }
+
+    private fun inputProvider(): Stream<Arguments> {
+        return inputLines.map{ s -> Arguments.of(s) }.stream()
+    }
 }

@@ -10,7 +10,7 @@ class MarbleGame(input: List<String>) {
     val marbles: ListNode
     var current: ListNode
     var idPlayed: Int
-    val scoreMap: MutableMap<Int,Int>
+    val scoreMap: MutableMap<Int,Long>
     var curPlayer: Int
 
     init {
@@ -38,10 +38,12 @@ class MarbleGame(input: List<String>) {
         current = start[2]
         idPlayed = 2
         curPlayer = 2
-        scoreMap = (0..numberOfPlayers).groupingBy { it }.aggregate { _, _:Int?, _, _ -> 0 }.toMutableMap()
+        scoreMap = (1..numberOfPlayers).groupingBy { it }.aggregate { _, _:Long?, _, _ -> 0L }.toMutableMap()
     }
 
     fun playMarble() {
+        if (++curPlayer > numberOfPlayers)
+            curPlayer = 1
         if (++idPlayed % 23 == 0)
             playMarble23()
         else
@@ -60,7 +62,6 @@ class MarbleGame(input: List<String>) {
     }
 
     private fun playMarble23() {
-        curPlayer = idPlayed % numberOfPlayers
         scoreMap[curPlayer] = scoreMap[curPlayer]?.plus(idPlayed) ?: throw AocException("could not update score for player $curPlayer")
         var previous7 = current
         repeat(7) { previous7 = previous7.previous ?: throw AocException("node $previous7 has no previous") }

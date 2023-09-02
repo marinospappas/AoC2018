@@ -16,7 +16,7 @@ class Day09: PuzzleSolver() {
         setDay()
     }
 
-    var result = 0
+    var result = 0L
     lateinit var marbleGame: MarbleGame
 
     override fun initSolver(): Pair<Long,String> {
@@ -38,6 +38,12 @@ class Day09: PuzzleSolver() {
 
     override fun solvePart2(): PuzzlePartSolution {
         val elapsed = measureTimeMillis {
+            marbleGame = MarbleGame(inputData)
+            marbleGame.maxMarbleId *= 100
+            while(marbleGame.idPlayed < marbleGame.maxMarbleId) {
+                marbleGame.playMarble()
+            }
+            result = marbleGame.scoreMap.values.max()
         }
         return PuzzlePartSolution(2, result.toString(), elapsed)
     }
