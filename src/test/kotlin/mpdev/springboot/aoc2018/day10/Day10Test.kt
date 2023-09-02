@@ -1,8 +1,10 @@
 package mpdev.springboot.aoc2018.day10
 
 import mpdev.springboot.aoc2018.input.InputDataReader
+import mpdev.springboot.aoc2018.solutions.day06.Coordinates
 import mpdev.springboot.aoc2018.solutions.day10.Day10
 import mpdev.springboot.aoc2018.solutions.day10.Message
+import mpdev.springboot.aoc2018.utils.Grid
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Order
@@ -41,8 +43,15 @@ class Day10Test {
 
     @Test
     @Order(3)
-    fun `Plays next marble`() {
-
+    fun `Simulate movement of message points`() {
+        val message = Message(inputLines)
+        println("initial state")
+        message.print()
+        repeat(5) {
+            println(it+1)
+            message.doMovement()
+            message.print()
+        }
     }
 
     @Test

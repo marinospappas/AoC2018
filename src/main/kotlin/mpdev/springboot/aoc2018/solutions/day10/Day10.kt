@@ -16,24 +16,29 @@ class Day10: PuzzleSolver() {
         setDay()
     }
 
-    var result = 0L
+    var result = ""
+    lateinit var message: Message
 
     override fun initSolver(): Pair<Long,String> {
         val elapsed = measureTimeMillis {
+            message = Message(inputData)
         }
         return Pair(elapsed, "milli-sec")
     }
 
     override fun solvePart1(): PuzzlePartSolution {
         val elapsed = measureTimeMillis {
+            while (!message.msgAppeared())
+                message.doMovement()
+            message.print()
         }
-        return PuzzlePartSolution(1, result.toString(), elapsed)
+        return PuzzlePartSolution(1, result, elapsed)
     }
 
     override fun solvePart2(): PuzzlePartSolution {
         val elapsed = measureTimeMillis {
         }
-        return PuzzlePartSolution(2, result.toString(), elapsed)
+        return PuzzlePartSolution(2, result, elapsed)
     }
 
 }

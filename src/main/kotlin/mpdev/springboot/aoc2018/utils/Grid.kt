@@ -27,6 +27,11 @@ open class Grid<T>(inputGridVisual: List<String> = emptyList(), private val mapp
         updateXYDimensions()
     }
 
+    constructor(inputGridXY: Array<Point>, mapper: Map<Char,T>): this(mapper = mapper) {
+        processInputXY(inputGridXY)
+        updateXYDimensions()
+    }
+
     private fun updateXYDimensions() {
         maxX = data.keys.maxOf { it.x } + 1
         maxY = data.keys.maxOf { it.y } + 1
@@ -70,6 +75,12 @@ open class Grid<T>(inputGridVisual: List<String> = emptyList(), private val mapp
                 if (mapper[input[y][x]] != null)
                     data[Point(x, y)] = mapper[input[y][x]]!!
             }
+        }
+    }
+
+    private fun processInputXY(input: Array<Point>) {
+        input.forEach { p ->
+            data[p] = mapper.values.first()
         }
     }
 
