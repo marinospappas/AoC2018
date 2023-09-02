@@ -22,7 +22,7 @@ class Message(input: List<String>) {
     fun msgAppeared(): Boolean {
         msgData.forEach { p ->
             var msgOn = true
-            for (i in 1..7) {
+            for (i in 1..4) {
                 if (!msgData.map{it.currentPos}.contains(p.currentPos + Point(p.currentPos.x, p.currentPos.y+i))) {
                     msgOn = false
                     break
