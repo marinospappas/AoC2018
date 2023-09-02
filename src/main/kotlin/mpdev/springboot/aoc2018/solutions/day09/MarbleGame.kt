@@ -6,22 +6,79 @@ class MarbleGame(input: List<String>) {
 
     var numberOfPlayers: Int
     var maxMarbleId: Int
-    var highScore: Int
+    var highScore = 0
     val marbles: ListNode
     var current: ListNode
+    var idPlayed: Int
+    val scoreMap: MutableMap<Int,Int>
+    var curPlayer: Int
 
     init {
-        val match = Regex("""(\d+) players; last marble is worth (\d+) points: high score is (\d+)""").find(input[0])
+        val match = Regex("""(\d+) players; last marble is worth (\d+) points(.*)?""").find(input[0])
         try {
-            val (players, lastMarble, score) = match!!.destructured
+            val (players, lastMarble, s) = match!!.destructured
             numberOfPlayers = players.toInt()
             maxMarbleId = lastMarble.toInt()
-            highScore = score.toInt()
+            if (s.isNotEmpty()) {
+                val match1 = Regex(""": high score is (\d+)?""").find(s)
+                val (score) = match1!!.destructured
+                highScore = score.toInt()
+            }
         } catch (e: Exception) {
             throw AocException("bad input line ${input[0]}")
         }
-        marbles = ListNode(0).also { it.previous = it; it.next = it }
-        current = marbles
+        val start = Array(3) { ListNode(it) }
+        start[0].next = start[2]
+        start[2].previous = start[0]
+        start[2].next = start[1]
+        start[1].previous = start[2]
+        start[1].next = start[0]
+        start[0].previous = start[1]
+        marbles = start[0]
+        current = start[2]
+        idPlayed = 2
+        curPlayer = 2
+        scoreMap = (0..numberOfPlayers).groupingBy { it }.aggregate { _, _:Int?, _, _ -> 0 }.toMutableMap()
+    }
+
+    fun playMarble() {
+        if (++idPlayed % 23 == 0)
+            playMarble23()
+        else
+            playNormalMarble()
+    }
+
+    private fun playNormalMarble() {
+        val nextMarble = ListNode(idPlayed)
+        val next1 = current.next
+        val next2 = next1?.next
+        next1?.next = nextMarble
+        nextMarble.previous = next1
+        nextMarble.next = next2
+        next2?.previous = nextMarble
+        current = nextMarble
+    }
+
+    private fun playMarble23() {
+        curPlayer = idPlayed % numberOfPlayers
+        scoreMap[curPlayer] = scoreMap[curPlayer]?.plus(idPlayed) ?: throw AocException("could not update score for player $curPlayer")
+        var previous7 = current
+        repeat(7) { previous7 = previous7.previous ?: throw AocException("node $previous7 has no previous") }
+        scoreMap[curPlayer] = scoreMap[curPlayer]?.plus(previous7.id) ?: throw AocException("could not update score for player $curPlayer")
+        val previous = previous7.previous ?: throw AocException("node $previous7 has no previous")
+        val next = previous7.next ?: throw AocException("node $previous7 has no next")
+        previous.next = next
+        next.previous = previous
+        current = next
+    }
+
+    fun print() {
+        var marble = marbles
+        do {
+            println(marble)
+            marble = marble.next ?: throw AocException("marble $marble has no next")
+        } while (marble != marbles)
+        println("current: $current")
     }
 }
 

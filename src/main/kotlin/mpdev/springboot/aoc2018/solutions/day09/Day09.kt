@@ -17,14 +17,21 @@ class Day09: PuzzleSolver() {
     }
 
     var result = 0
+    lateinit var marbleGame: MarbleGame
+
     override fun initSolver(): Pair<Long,String> {
         val elapsed = measureTimeMillis {
+            marbleGame = MarbleGame(inputData)
         }
         return Pair(elapsed, "milli-sec")
     }
 
     override fun solvePart1(): PuzzlePartSolution {
         val elapsed = measureTimeMillis {
+            while(marbleGame.idPlayed < marbleGame.maxMarbleId) {
+                marbleGame.playMarble()
+            }
+            result = marbleGame.scoreMap.values.max()
         }
         return PuzzlePartSolution(1, result.toString(), elapsed)
     }

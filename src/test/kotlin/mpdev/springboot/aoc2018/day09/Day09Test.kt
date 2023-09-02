@@ -7,7 +7,13 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
+import java.util.stream.Stream
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class Day09Test {
 
     private val day = 9                                     ///////// Update this for a new dayN test
@@ -30,20 +36,38 @@ class Day09Test {
 
     @Test
     @Order(2)
-    fun `Reads Input and sets up Tree`() {
+    fun `Reads Input and sets up Marble game`() {
         val marbleGame = MarbleGame(inputLines)
         println("players: ${marbleGame.numberOfPlayers}, marbles: ${marbleGame.maxMarbleId}, high score: ${marbleGame.highScore}")
-        println("marbles list: ${marbleGame.marbles}")
+        println("marbles list")
+        marbleGame.print()
         assertThat(marbleGame.numberOfPlayers).isEqualTo(9)
-        assertThat(marbleGame.maxMarbleId).isEqualTo(15)
+        assertThat(marbleGame.maxMarbleId).isEqualTo(25)
         assertThat(marbleGame.highScore).isEqualTo(32)
-        assertThat(marbleGame.current.id).isEqualTo(0)
+        assertThat(marbleGame.current.id).isEqualTo(2)
     }
 
     @Test
+    @Order(3)
+    fun `Plays next marble`() {
+        val marbleGame = MarbleGame(inputLines)
+        marbleGame.print()
+        var count = 2
+        while(marbleGame.idPlayed < marbleGame.maxMarbleId) {
+            println(count++)
+            marbleGame.playMarble()
+            marbleGame.print()
+        }
+        assertThat(marbleGame.scoreMap.values.max()).isEqualTo(32)
+    }
+
+    @ParameterizedTest
+    @MethodSource("inputProvider")
     @Order(4)
-    fun `Solves Part 1`() {
-        assertThat(puzzleSolver.solvePart1().result).isEqualTo("")
+    fun `Solves Part 1`(input: String) {
+        puzzleSolver.inputData = listOf(input)
+        puzzleSolver.initSolver()
+        assertThat(puzzleSolver.solvePart1().result).isEqualTo(puzzleSolver.marbleGame.highScore.toString())
     }
 
     @Test
@@ -51,4 +75,7 @@ class Day09Test {
     fun `Solves Part 2`() {
         assertThat(puzzleSolver.solvePart2().result).isEqualTo("")
     }
+     fun inputProvider(): Stream<Arguments> {
+         return inputLines.map{ s -> Arguments.of(s) }.stream()
+     }
 }
