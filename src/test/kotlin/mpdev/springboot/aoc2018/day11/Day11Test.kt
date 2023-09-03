@@ -39,7 +39,8 @@ class Day11Test {
         val fuelCellGrid = FuelCellGrid(inputLines)
         println("serial number: ${fuelCellGrid.serialNumber}")
         fuelCellGrid.printGrid()
-        assertThat(fuelCellGrid.grid.size).isEqualTo(300 * 300)
+        assertThat(fuelCellGrid.grid.size).isEqualTo(300)
+        assertThat(fuelCellGrid.grid[0].size).isEqualTo(300)
         assertThat(fuelCellGrid.serialNumber).isEqualTo(inputLines[0].toInt())
     }
 
@@ -53,7 +54,7 @@ class Day11Test {
     @Order(3)
     fun `Calculates Cell Power level`(x: Int, y: Int, serNum: Int, expected: Int) {
         val fuelCellGrid = FuelCellGrid(listOf(serNum.toString()))
-        assertThat(fuelCellGrid.getPowerLevel(Point(x,y))).isEqualTo(expected)
+        assertThat(fuelCellGrid.getPowerLevel(x,y)).isEqualTo(expected)
     }
 
     @ParameterizedTest
