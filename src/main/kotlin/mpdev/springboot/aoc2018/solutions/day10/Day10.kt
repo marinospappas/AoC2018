@@ -45,7 +45,6 @@ class Day10: PuzzleSolver() {
             }
             log.info("final min-max coordinates: x: {} - {} y: {} - {}", message.minX, message.maxX, message.minY, message.maxY)
             message.print()
-
         }
         return PuzzlePartSolution(1, "message in logfile", elapsed)
     }
