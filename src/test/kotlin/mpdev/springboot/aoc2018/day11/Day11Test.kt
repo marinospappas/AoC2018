@@ -37,8 +37,10 @@ class Day11Test {
     @Order(2)
     fun `Reads Input and sets up Grid data`() {
         val fuelCellGrid = FuelCellGrid(inputLines)
-        assertThat(fuelCellGrid.grid.size).isEqualTo(300)
-        assertThat(fuelCellGrid.grid[0].size).isEqualTo(300)
+        println("serial number: ${fuelCellGrid.serialNumber}")
+        fuelCellGrid.printGrid()
+        assertThat(fuelCellGrid.grid.size).isEqualTo(300 * 300)
+        assertThat(fuelCellGrid.serialNumber).isEqualTo(inputLines[0].toInt())
     }
 
     @ParameterizedTest
@@ -60,14 +62,14 @@ class Day11Test {
         "42, 21, 61, 30"
     )
     @Order(3)
-    fun `Calculates Max Power 3x3 Square`(serNum: Int, expX: Int, expY: Int, expPower: Int) {
-        val fuelCellGrid = FuelCellGrid(listOf(serNum.toString()))
-        val maxPowerSquare = fuelCellGrid.findHighestPowerSubGrid()
-        println(maxPowerSquare.second)
+    fun `Calculates Max Power 3x3 Square`(serNum: String, expX: Int, expY: Int, expPower: Int) {
+        val fuelCellGrid = FuelCellGrid(listOf(serNum))
+        val (maxPwrCoord, maxPower) = fuelCellGrid.findHighestPowerSubGrid()
+        println(maxPower)
+        fuelCellGrid.printSubgrid(maxPwrCoord)
         println()
-        fuelCellGrid.printSubgrid(maxPowerSquare.first)
-        assertThat(maxPowerSquare.first).isEqualTo(Point(expX,expY))
-        assertThat(maxPowerSquare.second).isEqualTo(expPower)
+        assertThat(maxPwrCoord).isEqualTo(Point(expX,expY))
+        assertThat(maxPower).isEqualTo(expPower)
     }
 
     @ParameterizedTest
@@ -82,10 +84,32 @@ class Day11Test {
         assertThat(puzzleSolver.solvePart1().result).isEqualTo("$expX,$expY")
     }
 
-    @Test
+    @ParameterizedTest
+    @CsvSource(
+        "18,  90, 269, 16, 113",
+        "42, 232, 251, 12, 119"
+    )
+    @Order(5)
+    fun `Calculates Max Power Any size Square`(serNum: String, expX: Int, expY: Int, expSize: Int, expPower: Int) {
+        val fuelCellGrid = FuelCellGrid(listOf(serNum))
+        val (maxPwrCoord, size, maxPower) = fuelCellGrid.findAnyHighestPowerSubGrid()
+        println("${maxPwrCoord.x},${maxPwrCoord.y},$size   $maxPower")
+        fuelCellGrid.printSubgrid(maxPwrCoord, size)
+        println()
+        assertThat(maxPwrCoord).isEqualTo(Point(expX,expY))
+        assertThat(maxPower).isEqualTo(expPower)
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+        "18,  90, 269, 16",
+        "42, 232, 251, 12"
+    )
     @Order(7)
-    fun `Solves Part 2`() {
-        assertThat(puzzleSolver.solvePart2().result).isEqualTo("")
+    fun `Solves Part 2`(serNum: String, expX: Int, expY: Int, expSize: Int) {
+        puzzleSolver.inputData = listOf(serNum)
+        puzzleSolver.initSolver()
+        assertThat(puzzleSolver.solvePart2().result).isEqualTo("$expX,$expY,$expSize")
     }
 
 }
