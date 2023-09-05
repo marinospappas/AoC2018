@@ -40,7 +40,7 @@ class Tree(input: List<String>) {
     }
 
     private fun printNode(node: Node) {
-        traverseTree(node) { n,i -> (0..(4*i)).forEach { _ -> print(" ") }; println(n) }
+        traverseTree(node) { n,l -> (0..(4*l)).forEach { _ -> print(" ") }; println(n) }
     }
 
     private fun processInput(node: Node, input: MutableList<Int>) {

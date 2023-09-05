@@ -65,7 +65,7 @@ class Day11Test {
     @Order(3)
     fun `Calculates Max Power 3x3 Square`(serNum: String, expX: Int, expY: Int, expPower: Int) {
         val fuelCellGrid = FuelCellGrid(listOf(serNum))
-        val (maxPwrCoord, maxPower) = fuelCellGrid.findHighestPowerSubGrid()
+        val (maxPwrCoord, maxPower) = fuelCellGrid.findHighestPower3x3SubGrid()
         println(maxPower)
         fuelCellGrid.printSubgrid(maxPwrCoord)
         println()

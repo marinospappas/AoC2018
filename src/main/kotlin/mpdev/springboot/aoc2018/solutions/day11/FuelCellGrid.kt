@@ -1,7 +1,7 @@
 package mpdev.springboot.aoc2018.solutions.day11
 
-import mpdev.springboot.aoc2018.utils.AocException
 import java.awt.Point
+import kotlin.math.max
 
 class FuelCellGrid(input: List<String>) {
 
@@ -11,47 +11,61 @@ class FuelCellGrid(input: List<String>) {
 
     val serialNumber: Int
     val grid: Array<IntArray>
-    val rowSubSums = mutableMapOf<Triple<Int,Int,Int>,Int>()    // key is x, row, size, value is that sub-sum
+    val subGridSums: Array<IntArray>    // element x, y is sum of grid elements in sub-grid from 0,0 to x,y
 
     init {
         serialNumber = input[0].toInt()
         grid = Array(GRID_SIZE) { y -> IntArray(GRID_SIZE) { x -> getPowerLevel(x, y) } }
         updatePowerLevels()
-        //calculateRowSubSums()
+        subGridSums = Array(GRID_SIZE) { y -> IntArray(GRID_SIZE) { x -> grid[y][x] } }
+        calculateSubSums()
     }
 
-    fun findHighestPowerSubGrid(size: Int = 3): Pair<Point,Int> {
+    // part 1
+
+    fun findHighestPower3x3SubGrid(): Pair<Point,Int> {
         val maxPowerMap = mutableMapOf<Point,Int>()
-        (0 until GRID_SIZE-size+1).forEach { y ->
-            (0 until GRID_SIZE-size+1).forEach { x ->
-                maxPowerMap[Point(x,y)] = getSubGridSum(x, y, size)
+        (0 until GRID_SIZE-2).forEach { y ->
+            (0 until GRID_SIZE-2).forEach { x ->
+                maxPowerMap[Point(x,y)] = getSub3x3GridSum(x, y)
             }
         }
         return Pair(maxPowerMap.maxBy { e -> e.value }.key, maxPowerMap.values.max())
     }
 
-    fun findAnyHighestPowerSubGrid(): Triple<Point,Int,Int> {
-        val maxPwrList = mutableListOf<Triple<Point,Int,Int>>()
-        for (size in (1 .. GRID_SIZE)) {
-            val (coord, pwr) = findHighestPowerSubGrid(size)
-            // stop if the maxPwer decreases twice in a row
-            if (maxPwrList.size > 1 &&
-                pwr < maxPwrList.last().third && maxPwrList.last().third < maxPwrList[maxPwrList.lastIndex-1].third)
-                break
-            maxPwrList.add(Triple(coord, size, pwr))
-        }
-        return maxPwrList.maxBy { it.third }
-    }
-
-    private fun getSubGridSum(x: Int, y: Int, size: Int = 3) : Int {
+    private fun getSub3x3GridSum(x: Int, y: Int) : Int {
         var total = 0
-        (0 until size).forEach { dy ->
-            (0 until size).forEach { dx ->
+        (0 until 3).forEach { dy ->
+            (0 until 3).forEach { dx ->
                 total += getPowerLevel(x + dx, y + dy)
             }
         }
         return total
     }
+
+    // part 2
+
+    fun findAnyHighestPowerSubGrid(): Triple<Point,Int,Int> {
+        val maxPwrList = mutableMapOf<Triple<Int,Int,Int>,Int>()  // key (x,y), size,  value pwr
+        loop@ for (y in 0 until GRID_SIZE) {
+            for (x in 0 until GRID_SIZE) {
+                for (size in (1 .. GRID_SIZE - max(x,y))) {
+                    var subSum = subGridSums[y+size-1][x+size-1]   // sub sum from 0,0 to x+size-1,y+size-1
+                    if (x > 0)
+                        subSum -= subGridSums[y+size-1][x-1]       // remove sub sum to the left
+                    if (y > 0)
+                        subSum -= subGridSums[y-1][x+size-1]       // remove sub sum above
+                    if (x > 0 && y > 0)
+                        subSum += subGridSums[y-1][x-1]            // add sub sum from 0,0 to x-1,y-1 as it has been subtracted twice
+                    maxPwrList[Triple(x,y,size)] = subSum
+                }
+            }
+        }
+        val maxEntry = maxPwrList.maxBy { it.value }
+        return Triple(Point(maxEntry.key.first, maxEntry.key.second), maxEntry.key.third, maxEntry.value)
+    }
+
+    ////
 
     private fun updatePowerLevels() {
         (0 until GRID_SIZE).forEach { y ->
@@ -61,23 +75,17 @@ class FuelCellGrid(input: List<String>) {
         }
     }
 
-    private fun calculateRowSubSums() {
-        (0 until GRID_SIZE).forEach { row ->
-            (0 until GRID_SIZE).forEach { x ->
-                (1 .. GRID_SIZE).forEach { size ->
-                    rowSubSums[Triple(x,row,size)] = calculateRowSubSumRorXYAndSize(x, row, size)
-                }
+    private fun calculateSubSums() {
+        (1 until GRID_SIZE).forEach { row ->
+            (0 until GRID_SIZE).forEach { i ->
+                subGridSums[row][i] = subGridSums[row-1][i] + grid[row][i]
             }
-            println("sub sums row $row done")
         }
-    }
-
-    private fun calculateRowSubSumRorXYAndSize(x: Int, y: Int, size: Int): Int {
-        val value = grid[y][x]
-        return if (size == 1)
-            value
-        else
-            rowSubSums[Triple(x,y,size-1)]?.plus(value) ?: throw AocException("no sum for point $x,$y size ${size-1}")
+        (0 until GRID_SIZE).forEach { i ->
+            (1 until GRID_SIZE).forEach { col ->
+                subGridSums[i][col] += subGridSums[i][col-1]
+            }
+        }
     }
 
     fun getPowerLevel(x: Int, y: Int) : Int {

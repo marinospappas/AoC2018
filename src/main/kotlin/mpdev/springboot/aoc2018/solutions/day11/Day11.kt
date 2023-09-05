@@ -28,7 +28,7 @@ class Day11: PuzzleSolver() {
 
     override fun solvePart1(): PuzzlePartSolution {
         val elapsed = measureTimeMillis {
-            val (maxPower3Coord, _) = fuelCellGrid.findHighestPowerSubGrid()
+            val (maxPower3Coord, _) = fuelCellGrid.findHighestPower3x3SubGrid()
             result = "${maxPower3Coord.x},${maxPower3Coord.y}"
         }
         return PuzzlePartSolution(1, result, elapsed)
