@@ -39,6 +39,13 @@ class Day11Test {
         val fuelCellGrid = FuelCellGrid(inputLines)
         println("serial number: ${fuelCellGrid.serialNumber}")
         fuelCellGrid.printGrid()
+        println("sub sums")
+        (0 until 300).forEach { y ->
+            (0 until 300).forEach { x ->
+                print("${fuelCellGrid.subGridSums[y][x]}  ")
+            }
+            println()
+        }
         assertThat(fuelCellGrid.grid.size).isEqualTo(300)
         assertThat(fuelCellGrid.grid[0].size).isEqualTo(300)
         assertThat(fuelCellGrid.serialNumber).isEqualTo(inputLines[0].toInt())
