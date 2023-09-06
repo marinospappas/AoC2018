@@ -2,6 +2,7 @@ package mpdev.springboot.aoc2018.day12
 
 import mpdev.springboot.aoc2018.input.InputDataReader
 import mpdev.springboot.aoc2018.solutions.day12.Day12
+import mpdev.springboot.aoc2018.solutions.day12.Plants
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Order
@@ -31,8 +32,10 @@ class Day12Test {
 
     @Test
     @Order(2)
-    fun `Reads Input and sets up `() {
-
+    fun `Reads Input and sets up Plants grid`() {
+        val plants = Plants(inputLines)
+        plants.grid.print()
+        assertThat(plants.grid.getDataPoints().count()).isEqualTo(inputLines[0].count { it == '#' })
     }
 
     @Test
