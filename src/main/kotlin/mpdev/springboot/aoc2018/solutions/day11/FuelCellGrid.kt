@@ -47,10 +47,12 @@ class FuelCellGrid(input: List<String>) {
 
     fun findAnyHighestPowerSubGrid(): Triple<Point,Int,Int> {
         val maxPwrList = mutableMapOf<Triple<Int,Int,Int>,Int>()  // key (x,y), size,  value pwr
-        loop@ for (y in 0 until GRID_SIZE) {
-            for (x in 0 until GRID_SIZE) {
-                for (size in (1 .. GRID_SIZE - max(x,y))) {
-                    var subSum = subGridSums[y+size-1][x+size-1]   // sub sum from 0,0 to x+size-1,y+size-1
+        var subSum: Int
+        var prevSubSum = 0
+        (0 until GRID_SIZE).forEach { y ->
+            (0 until GRID_SIZE).forEach { x ->
+                sizeLoop@for (size in (1 .. GRID_SIZE - max(x,y))) {
+                    subSum = subGridSums[y+size-1][x+size-1]       // sub sum from 0,0 to x+size-1,y+size-1
                     if (x > 0)
                         subSum -= subGridSums[y+size-1][x-1]       // remove sub sum to the left
                     if (y > 0)
@@ -58,6 +60,9 @@ class FuelCellGrid(input: List<String>) {
                     if (x > 0 && y > 0)
                         subSum += subGridSums[y-1][x-1]            // add sub sum from 0,0 to x-1,y-1 as it has been subtracted twice
                     maxPwrList[Triple(x,y,size)] = subSum
+                    if (prevSubSum < 0 && subSum < prevSubSum)     // performance improvement to break the inner loop
+                        break@sizeLoop                             // as the sums become negative after a certain size
+                    prevSubSum = subSum
                 }
             }
         }
