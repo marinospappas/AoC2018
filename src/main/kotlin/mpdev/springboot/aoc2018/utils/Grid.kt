@@ -109,14 +109,14 @@ open class Grid<T>(inputGridVisual: List<String> = emptyList(), private val mapp
 
     protected fun printGrid(grid: Array<CharArray>) {
         for (i in grid.indices) {
-            print("${String.format("%2d",i)} ")
+            print("${String.format("%2d",i%100)} ")
             for (j in grid.first().indices)
                 print(grid[i][j])
             println()
         }
         print("   ")
         for (i in grid.first().indices)
-            print(if (i%10 == 0) i/10 else " ")
+            print(if (i%10 == 0) (i/10)%10 else " ")
         println()
         print("   ")
         for (i in grid.first().indices)

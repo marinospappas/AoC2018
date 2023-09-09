@@ -16,7 +16,7 @@ class Day12: PuzzleSolver() {
         setDay()
     }
 
-    var result = 0
+    var result = 0L
     lateinit var plants: Plants
 
     override fun initSolver(): Pair<Long,String> {
@@ -29,13 +29,17 @@ class Day12: PuzzleSolver() {
     override fun solvePart1(): PuzzlePartSolution {
         val elapsed = measureTimeMillis {
             repeat(20) { plants.newGeneration() }
-            result = plants.grid.getDataPoints().keys.filter { it.y == 20 }.sumOf { it.x }
+            result = plants.grid.getDataPoints().keys.filter { it.y == 20 }.sumOf { it.x }.toLong()
         }
         return PuzzlePartSolution(1, result.toString(), elapsed)
     }
 
     override fun solvePart2(): PuzzlePartSolution {
         val elapsed = measureTimeMillis {
+            val plants = Plants(inputData)
+            repeat(100) { plants.newGeneration() }
+            val lastGen = plants.grid.getDataPoints().filter { it.key.y == 100 }.keys
+            result = (50_000_000_000 - 100) * lastGen.count() + lastGen.sumOf { it.x }
         }
         return PuzzlePartSolution(2, result.toString(), elapsed)
     }

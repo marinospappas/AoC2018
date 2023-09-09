@@ -8,6 +8,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import java.io.File
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class Day12Test {
@@ -80,7 +81,14 @@ class Day12Test {
     @Test
     @Order(7)
     fun `Solves Part 2`() {
-        assertThat(puzzleSolver.solvePart2().result).isEqualTo("")
+        inputLines = File("src/main/resources/inputdata/input12.txt").readLines()
+        val plants = Plants(inputLines)
+        repeat(100) { plants.newGeneration() }
+        plants.print()
+        val lastGen = plants.grid.getDataPoints().filter { it.key.y == 100 }.keys
+        println("last generation: ${lastGen.minOf { it.x }}, ${lastGen.maxOf { it.x }}, ${lastGen.sumOf { it.x }}")
+        val result: Long = (50_000_000_000 - 100) * lastGen.count() + lastGen.sumOf { it.x }
+        println(result)
     }
 
 }
