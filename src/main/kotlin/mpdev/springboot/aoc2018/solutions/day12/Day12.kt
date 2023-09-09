@@ -16,24 +16,28 @@ class Day12: PuzzleSolver() {
         setDay()
     }
 
-    var result = ""
+    var result = 0
+    lateinit var plants: Plants
 
     override fun initSolver(): Pair<Long,String> {
         val elapsed = measureTimeMillis {
+            plants = Plants(inputData)
         }
         return Pair(elapsed, "milli-sec")
     }
 
     override fun solvePart1(): PuzzlePartSolution {
         val elapsed = measureTimeMillis {
+            repeat(20) { plants.newGeneration() }
+            result = plants.grid.getDataPoints().keys.filter { it.y == 20 }.sumOf { it.x }
         }
-        return PuzzlePartSolution(1, result, elapsed)
+        return PuzzlePartSolution(1, result.toString(), elapsed)
     }
 
     override fun solvePart2(): PuzzlePartSolution {
         val elapsed = measureTimeMillis {
         }
-        return PuzzlePartSolution(2, result, elapsed)
+        return PuzzlePartSolution(2, result.toString(), elapsed)
     }
 
 }

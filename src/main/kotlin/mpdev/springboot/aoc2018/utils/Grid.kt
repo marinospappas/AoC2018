@@ -2,7 +2,7 @@ package mpdev.springboot.aoc2018.utils
 
 import java.awt.Point
 
-open class Grid<T>(inputGridVisual: List<String> = emptyList(), private val mapper: Map<Char,T>) {
+open class Grid<T>(inputGridVisual: List<String> = emptyList(), private val mapper: Map<Char,T>, private val border: Int = 1) {
 
     protected var data = mutableMapOf<Point,T>()
     protected var maxX: Int = 0
@@ -13,30 +13,30 @@ open class Grid<T>(inputGridVisual: List<String> = emptyList(), private val mapp
     init {
         if (inputGridVisual.isNotEmpty()) {
             processInputVisual(inputGridVisual)
-            updateXYDimensions()
+            updateXYDimensions(border)
         }
     }
 
-    constructor(gridData: Map<Point,T>, mapper: Map<Char,T>): this(mapper = mapper) {
+    constructor(gridData: Map<Point,T>, mapper: Map<Char,T>, border: Int = 1): this(mapper = mapper, border = border) {
         data = gridData.toMutableMap()
-        updateXYDimensions()
+        updateXYDimensions(border)
     }
 
-    constructor(inputGridXY: Set<String>, mapper: Map<Char,T>): this(mapper = mapper) {
+    constructor(inputGridXY: Set<String>, mapper: Map<Char,T>, border: Int = 1): this(mapper = mapper, border = border) {
         processInputXY(inputGridXY)
-        updateXYDimensions()
+        updateXYDimensions(border)
     }
 
-    constructor(inputGridXY: Array<Point>, mapper: Map<Char,T>): this(mapper = mapper) {
+    constructor(inputGridXY: Array<Point>, mapper: Map<Char,T>, border: Int = 1): this(mapper = mapper, border = border) {
         processInputXY(inputGridXY)
-        updateXYDimensions()
+        updateXYDimensions(border)
     }
 
-    private fun updateXYDimensions() {
-        maxX = data.keys.maxOf { it.x } + 1
-        maxY = data.keys.maxOf { it.y } + 1
-        minX = data.keys.minOf { it.x } - 1
-        minY = data.keys.minOf { it.y } - 1
+    private fun updateXYDimensions(border: Int) {
+        maxX = data.keys.maxOf { it.x } + border
+        maxY = data.keys.maxOf { it.y } + border
+        minX = data.keys.minOf { it.x } - border
+        minY = data.keys.minOf { it.y } - border
     }
 
     fun getDataPoints() = data.toMap()
@@ -44,13 +44,16 @@ open class Grid<T>(inputGridVisual: List<String> = emptyList(), private val mapp
     open fun setDataPoint(p: Point, t: T) {
         data[p] = t
     }
+    open fun removeDataPoint(p: Point) {
+        data.remove(p)
+    }
 
     fun getDimensions() = Pair(maxX-minX+1, maxY-minY+1)
     fun getMinMaxXY() = FourComponents(minX, maxX, minY, maxY)
     fun countOf(item: T) = data.values.count { it == item }
 
     open fun updateDimensions() {
-       updateXYDimensions()
+       updateXYDimensions(border)
     }
 
     // mapping of a column or a row to int by interpreting the co-ordinates as bit positions
