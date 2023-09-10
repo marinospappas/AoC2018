@@ -2,7 +2,7 @@ package mpdev.springboot.aoc2018.solutions.day12
 
 import mpdev.springboot.aoc2018.utils.AocException
 import mpdev.springboot.aoc2018.utils.Grid
-import java.awt.Point
+import mpdev.springboot.aoc2018.utils.Point
 
 class Plants(input: List<String>) {
 

@@ -1,33 +1,37 @@
 package mpdev.springboot.aoc2018.utils
 
-import java.awt.Point
-
-open class Grid<T>(inputGridVisual: List<String> = emptyList(), private val mapper: Map<Char,T>, private val border: Int = 1) {
+open class Grid<T>(inputGridVisual: List<String> = emptyList(), private val mapper: Map<Char,T>,
+                   private val border: Int = 1, private val defaultChar: Char = '.') {
 
     protected var data = mutableMapOf<Point,T>()
     protected var maxX: Int = 0
     protected var maxY: Int = 0
     protected var minX: Int = 0
     protected var minY: Int = 0
+    protected var DEFAULT_CHAR: Char
 
     init {
         if (inputGridVisual.isNotEmpty()) {
             processInputVisual(inputGridVisual)
             updateXYDimensions(border)
         }
+        DEFAULT_CHAR = defaultChar
     }
 
-    constructor(gridData: Map<Point,T>, mapper: Map<Char,T>, border: Int = 1): this(mapper = mapper, border = border) {
+    constructor(gridData: Map<Point,T>, mapper: Map<Char,T>, border: Int = 1, defaultChar: Char = '.'):
+            this(mapper = mapper, border = border, defaultChar = defaultChar) {
         data = gridData.toMutableMap()
         updateXYDimensions(border)
     }
 
-    constructor(inputGridXY: Set<String>, mapper: Map<Char,T>, border: Int = 1): this(mapper = mapper, border = border) {
+    constructor(inputGridXY: Set<String>, mapper: Map<Char,T>, border: Int = 1, defaultChar: Char = '.'):
+            this(mapper = mapper, border = border, defaultChar = defaultChar) {
         processInputXY(inputGridXY)
         updateXYDimensions(border)
     }
 
-    constructor(inputGridXY: Array<Point>, mapper: Map<Char,T>, border: Int = 1): this(mapper = mapper, border = border) {
+    constructor(inputGridXY: Array<Point>, mapper: Map<Char,T>, border: Int = 1, defaultChar: Char = '.'):
+            this(mapper = mapper, border = border, defaultChar = defaultChar) {
         processInputXY(inputGridXY)
         updateXYDimensions(border)
     }
@@ -66,7 +70,6 @@ open class Grid<T>(inputGridVisual: List<String> = emptyList(), private val mapp
             .fold(0) { acc, i -> acc + i }
 
     companion object {
-        const val DEFAULT_CHAR = '.'
         private val bitToInt = intArrayOf( 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768,
             65536, 131072, 262144, 524288, 1_048_576, 2_097_152, 4_194_304, 8_388_608,
             16_777_216, 33_554_432, 67_108_864, 134_217_728, 268_435_456, 536_870_912, 1_073_741_824 )

@@ -1,6 +1,5 @@
 package mpdev.springboot.aoc2018.utils
 
-import java.awt.Point
 import java.lang.StringBuilder
 import kotlin.math.abs
 

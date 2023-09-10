@@ -1,10 +1,6 @@
 package mpdev.springboot.aoc2018.solutions.day10
 
-import mpdev.springboot.aoc2018.utils.AocException
-import mpdev.springboot.aoc2018.utils.Grid
-import mpdev.springboot.aoc2018.utils.plus
-import mpdev.springboot.aoc2018.utils.times
-import java.awt.Point
+import mpdev.springboot.aoc2018.utils.*
 
 class Message(input: List<String>) {
 

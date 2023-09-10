@@ -1,6 +1,5 @@
 package mpdev.springboot.aoc2018.utils
 
-import java.awt.Point
 import kotlin.math.abs
 
 class HexGrid<T>(input: List<String> = emptyList(), mapper: Map<Char,T>): Grid<T>(input, mapper) {
