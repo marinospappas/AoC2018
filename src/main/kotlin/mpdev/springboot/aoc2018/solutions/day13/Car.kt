@@ -23,13 +23,12 @@ data class Car(var direction: CarDirection, var position: Point,
                     CarDirection.CAR_UP, CarDirection.CAR_DOWN -> direction.turnLeft()
                 }
             TrackItem.CROSS -> {
-                val newDirectionOfTurn = lastDirectionOfTurn.getNext()
-                nextDirection = when (newDirectionOfTurn) {
+                nextDirection = when (lastDirectionOfTurn.getNext()) {
                     DirectionOfTurn.LEFT -> direction.turnLeft()
                     DirectionOfTurn.STRAIGHT -> direction
                     DirectionOfTurn.RIGHT -> direction.turnRight()
                 }
-                lastDirectionOfTurn = newDirectionOfTurn
+                lastDirectionOfTurn = lastDirectionOfTurn.getNext()
             }
             else -> throw AocException("invalid position for direction $direction: $position ${grid.getDataPoint(position)}")
         }
