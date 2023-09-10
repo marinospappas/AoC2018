@@ -5,39 +5,40 @@ import mpdev.springboot.aoc2018.utils.Grid
 import mpdev.springboot.aoc2018.utils.Point
 import mpdev.springboot.aoc2018.utils.plus
 
-data class Car(var direction: CarDirection, var position: Point, var lastDirectionOfTurn: DirectionOfTurn = DirectionOfTurn.RIGHT) {
+data class Car(var direction: CarDirection, var position: Point,
+               var lastDirectionOfTurn: DirectionOfTurn = DirectionOfTurn.RIGHT, var crashed: Boolean = false) {
 
     fun moveToNextPoint(grid: Grid<TrackItem>) {
         val nextDirection: CarDirection
         when (grid.getDataPoint(position)) {
             TrackItem.STRAIGHT_V, TrackItem.STRAIGHT_H -> nextDirection = direction
             TrackItem.BEND1 ->
-                when (direction) {
-                    CarDirection.CAR_UP -> nextDirection = CarDirection.CAR_RIGHT
-                    CarDirection.CAR_RIGHT -> nextDirection = CarDirection.CAR_UP
-                    CarDirection.CAR_DOWN -> nextDirection = CarDirection.CAR_LEFT
-                    CarDirection.CAR_LEFT -> nextDirection = CarDirection.CAR_DOWN
+                nextDirection = when (direction) {
+                    CarDirection.CAR_UP -> CarDirection.CAR_RIGHT
+                    CarDirection.CAR_RIGHT -> CarDirection.CAR_UP
+                    CarDirection.CAR_DOWN -> CarDirection.CAR_LEFT
+                    CarDirection.CAR_LEFT -> CarDirection.CAR_DOWN
                 }
             TrackItem.BEND2 ->
-                when (direction) {
-                    CarDirection.CAR_UP -> nextDirection = CarDirection.CAR_LEFT
-                    CarDirection.CAR_RIGHT -> nextDirection = CarDirection.CAR_DOWN
-                    CarDirection.CAR_DOWN -> nextDirection = CarDirection.CAR_RIGHT
-                    CarDirection.CAR_LEFT -> nextDirection = CarDirection.CAR_UP
+                nextDirection = when (direction) {
+                    CarDirection.CAR_UP -> CarDirection.CAR_LEFT
+                    CarDirection.CAR_RIGHT -> CarDirection.CAR_DOWN
+                    CarDirection.CAR_DOWN -> CarDirection.CAR_RIGHT
+                    CarDirection.CAR_LEFT -> CarDirection.CAR_UP
                 }
             TrackItem.CROSS -> {
                 val newDirectionOfTurn = lastDirectionOfTurn.getNext()
-                when (newDirectionOfTurn) {
-                    DirectionOfTurn.LEFT -> nextDirection = direction.turnLeft()
-                    DirectionOfTurn.STRAIGHT -> nextDirection = direction
-                    DirectionOfTurn.RIGHT -> nextDirection = direction.turnRight()
+                nextDirection = when (newDirectionOfTurn) {
+                    DirectionOfTurn.LEFT -> direction.turnLeft()
+                    DirectionOfTurn.STRAIGHT -> direction
+                    DirectionOfTurn.RIGHT -> direction.turnRight()
                 }
                 lastDirectionOfTurn = newDirectionOfTurn
             }
             else -> throw AocException("invalid position for direction $direction: $position ${grid.getDataPoint(position)}")
         }
         direction = nextDirection
-        position += nextDirection.speed
+        position += direction.speed
     }
 }
 

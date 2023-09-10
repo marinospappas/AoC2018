@@ -5,10 +5,7 @@ import mpdev.springboot.aoc2018.solutions.day13.Day13
 import mpdev.springboot.aoc2018.solutions.day13.Track
 import mpdev.springboot.aoc2018.utils.Point
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Order
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class Day13Test {
@@ -48,7 +45,7 @@ class Day13Test {
         val track = Track(inputLines)
         track.print()
         println(track.cars)
-        val collision = track.runCars(true)
+        val collision = track.runCarsUntilFirstCrash(true)
         println(collision)
         assertThat(collision).isEqualTo(Point(7,3))
     }
@@ -60,15 +57,29 @@ class Day13Test {
     }
 
     @Test
-    @Order(7)
-    fun `Solves Part 2`() {
-        println(-1 % 4)
-        println((-1).mod(4))
-        println((3).mod(4))
-        println((2).mod(4))
-        println((1).mod(4))
-        println((0).mod(4))
-        assertThat(puzzleSolver.solvePart2().result).isEqualTo("325")
+    @Order(5)
+    fun `Removes Crashes`() {
+        val track = Track(inputPart2())
+        val lastPosition = track.runCarsAndRemoveCrashes(true)
+        println(lastPosition)
+        assertThat(lastPosition).isEqualTo(Point(6,4))
     }
 
+    @Test
+    @Order(7)
+    fun `Solves Part 2`() {
+        puzzleSolver.inputData = inputPart2()
+        puzzleSolver.initSolver()
+        assertThat(puzzleSolver.solvePart2().result).isEqualTo("[6,4]")
+    }
+
+    private fun inputPart2() = listOf(
+        "/>-<\\  ",
+        "|   |  ",
+        "| /<+-\\",
+        "| | | v",
+        "\\>+</ |",
+        "  |   ^",
+        "  \\<->/"
+    )
 }

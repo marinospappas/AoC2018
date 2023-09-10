@@ -11,15 +11,15 @@ class Track(val input: List<String>) {
         grid.getDataPoints().filter { TrackItem.isCar(it.value) }.forEach {
             cars.add(Car(CarDirection.getDirectionFromValue(it.value), it.key))
             grid.setDataPoint(it.key, if (setOf(TrackItem.CAR_U, TrackItem.CAR_D).contains(it.value))
-                    TrackItem.STRAIGHT_V
-                else
-                    TrackItem.STRAIGHT_H
+                TrackItem.STRAIGHT_V
+            else
+                TrackItem.STRAIGHT_H
             )
         }
         cars.sortBy { it.position }
     }
 
-    fun runCars(debug: Boolean = false): Point {
+    fun runCarsUntilFirstCrash(debug: Boolean = false): Point {
         repeat (100_000) { count ->
             for (car in cars) {
                 car.moveToNextPoint(grid)
@@ -33,6 +33,28 @@ class Track(val input: List<String>) {
                 print()
                 println(cars)
             }
+        }
+        return Point(-1,-1)
+    }
+
+    fun runCarsAndRemoveCrashes(debug: Boolean = false): Point {
+        repeat (1_000_000) { count ->
+            if (cars.size > 1) {
+                for (car in cars) {
+                    car.moveToNextPoint(grid)
+                    val collisionMap = cars.groupBy { it.position }.filter { it.value.count() > 1 }
+                    if (collisionMap.isNotEmpty())
+                        cars = cars.filterNot { collisionMap.keys.contains(it.position) }.toMutableList()
+                }
+                cars.sortBy { car -> car.position }
+                if (debug) {
+                    println("iteration $count")
+                    print()
+                    println(cars)
+                }
+            }
+            else
+                return cars.first().position
         }
         return Point(-1,-1)
     }

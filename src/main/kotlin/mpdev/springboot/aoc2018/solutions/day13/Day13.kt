@@ -28,13 +28,15 @@ class Day13: PuzzleSolver() {
 
     override fun solvePart1(): PuzzlePartSolution {
         val elapsed = measureTimeMillis {
-            result = track.runCars().toString()
+            result = track.runCarsUntilFirstCrash().toString()
         }
         return PuzzlePartSolution(1, result, elapsed)
     }
 
     override fun solvePart2(): PuzzlePartSolution {
         val elapsed = measureTimeMillis {
+            track = Track(inputData)
+            result = track.runCarsAndRemoveCrashes().toString()
         }
         return PuzzlePartSolution(2, result, elapsed)
     }
