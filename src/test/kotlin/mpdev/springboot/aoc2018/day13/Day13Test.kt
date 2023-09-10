@@ -62,6 +62,12 @@ class Day13Test {
     @Test
     @Order(7)
     fun `Solves Part 2`() {
+        println(-1 % 4)
+        println((-1).mod(4))
+        println((3).mod(4))
+        println((2).mod(4))
+        println((1).mod(4))
+        println((0).mod(4))
         assertThat(puzzleSolver.solvePart2().result).isEqualTo("325")
     }
 

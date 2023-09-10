@@ -9,74 +9,35 @@ data class Car(var direction: CarDirection, var position: Point, var lastDirecti
 
     fun moveToNextPoint(grid: Grid<TrackItem>) {
         val nextDirection: CarDirection
-        when (direction) {
-            CarDirection.CAR_UP -> {
-                when (grid.getDataPoint(position)) {
-                    TrackItem.STRAIGHT_V -> nextDirection = direction
-                    TrackItem.BEND1 -> nextDirection = CarDirection.CAR_RIGHT
-                    TrackItem.BEND2 -> nextDirection = CarDirection.CAR_LEFT
-                    TrackItem.CROSS -> {
-                        when (lastDirectionOfTurn.getNext()) {
-                            DirectionOfTurn.LEFT -> nextDirection = CarDirection.CAR_LEFT
-                            DirectionOfTurn.STRAIGHT -> nextDirection = CarDirection.CAR_UP
-                            DirectionOfTurn.RIGHT -> nextDirection = CarDirection.CAR_RIGHT
-                        }
-                        lastDirectionOfTurn = lastDirectionOfTurn.getNext()
-                    }
-                    else -> throw AocException("invalid position for direction $direction: $position ${grid.getDataPoint(position)}")
+        when (grid.getDataPoint(position)) {
+            TrackItem.STRAIGHT_V, TrackItem.STRAIGHT_H -> nextDirection = direction
+            TrackItem.BEND1 ->
+                when (direction) {
+                    CarDirection.CAR_UP -> nextDirection = CarDirection.CAR_RIGHT
+                    CarDirection.CAR_RIGHT -> nextDirection = CarDirection.CAR_UP
+                    CarDirection.CAR_DOWN -> nextDirection = CarDirection.CAR_LEFT
+                    CarDirection.CAR_LEFT -> nextDirection = CarDirection.CAR_DOWN
                 }
-            }
-            CarDirection.CAR_RIGHT -> {
-                when (grid.getDataPoint(position)) {
-                    TrackItem.STRAIGHT_H -> nextDirection = direction
-                    TrackItem.BEND1 -> nextDirection = CarDirection.CAR_UP
-                    TrackItem.BEND2 -> nextDirection = CarDirection.CAR_DOWN
-                    TrackItem.CROSS -> {
-                        when (lastDirectionOfTurn.getNext()) {
-                            DirectionOfTurn.LEFT -> nextDirection = CarDirection.CAR_UP
-                            DirectionOfTurn.STRAIGHT -> nextDirection = CarDirection.CAR_RIGHT
-                            DirectionOfTurn.RIGHT -> nextDirection = CarDirection.CAR_DOWN
-                        }
-                        lastDirectionOfTurn = lastDirectionOfTurn.getNext()
-                    }
-                    else -> throw AocException("invalid position for direction $direction: $position ${grid.getDataPoint(position)}")
+            TrackItem.BEND2 ->
+                when (direction) {
+                    CarDirection.CAR_UP -> nextDirection = CarDirection.CAR_LEFT
+                    CarDirection.CAR_RIGHT -> nextDirection = CarDirection.CAR_DOWN
+                    CarDirection.CAR_DOWN -> nextDirection = CarDirection.CAR_RIGHT
+                    CarDirection.CAR_LEFT -> nextDirection = CarDirection.CAR_UP
                 }
-            }
-            CarDirection.CAR_DOWN -> {
-                when (grid.getDataPoint(position)) {
-                    TrackItem.STRAIGHT_V -> nextDirection = direction
-                    TrackItem.BEND1 -> nextDirection = CarDirection.CAR_LEFT
-                    TrackItem.BEND2 -> nextDirection = CarDirection.CAR_RIGHT
-                    TrackItem.CROSS -> {
-                        when (lastDirectionOfTurn.getNext()) {
-                            DirectionOfTurn.LEFT -> nextDirection = CarDirection.CAR_RIGHT
-                            DirectionOfTurn.STRAIGHT -> nextDirection = CarDirection.CAR_DOWN
-                            DirectionOfTurn.RIGHT -> nextDirection = CarDirection.CAR_LEFT
-                        }
-                        lastDirectionOfTurn = lastDirectionOfTurn.getNext()
-                    }
-                    else -> throw AocException("invalid position for direction $direction: $position ${grid.getDataPoint(position)}")
+            TrackItem.CROSS -> {
+                val newDirectionOfTurn = lastDirectionOfTurn.getNext()
+                when (newDirectionOfTurn) {
+                    DirectionOfTurn.LEFT -> nextDirection = direction.turnLeft()
+                    DirectionOfTurn.STRAIGHT -> nextDirection = direction
+                    DirectionOfTurn.RIGHT -> nextDirection = direction.turnRight()
                 }
+                lastDirectionOfTurn = newDirectionOfTurn
             }
-            CarDirection.CAR_LEFT -> {
-                when (grid.getDataPoint(position)) {
-                    TrackItem.STRAIGHT_H -> nextDirection = direction
-                    TrackItem.BEND1 -> nextDirection = CarDirection.CAR_DOWN
-                    TrackItem.BEND2 -> nextDirection = CarDirection.CAR_UP
-                    TrackItem.CROSS -> {
-                        when (lastDirectionOfTurn.getNext()) {
-                            DirectionOfTurn.LEFT -> nextDirection = CarDirection.CAR_DOWN
-                            DirectionOfTurn.STRAIGHT -> nextDirection = CarDirection.CAR_LEFT
-                            DirectionOfTurn.RIGHT -> nextDirection = CarDirection.CAR_UP
-                        }
-                        lastDirectionOfTurn = lastDirectionOfTurn.getNext()
-                    }
-                    else -> throw AocException("invalid position for direction $direction: $position ${grid.getDataPoint(position)}")
-                }
-            }
+            else -> throw AocException("invalid position for direction $direction: $position ${grid.getDataPoint(position)}")
         }
-        position += nextDirection.speed
         direction = nextDirection
+        position += nextDirection.speed
     }
 }
 
@@ -85,6 +46,9 @@ enum class CarDirection(val value: TrackItem, val speed: Point) {
     CAR_RIGHT(TrackItem.CAR_R, Point(1, 0)),
     CAR_DOWN(TrackItem.CAR_D, Point(0, 1)),
     CAR_LEFT(TrackItem.CAR_L, Point(-1, 0));
+
+    fun turnRight() = values()[ (ordinal+1) % CarDirection.values().size ]
+    fun turnLeft() = values()[ (ordinal-1).mod(CarDirection.values().size) ]
 
     companion object {
         fun getDirectionFromValue(value: TrackItem): CarDirection =
