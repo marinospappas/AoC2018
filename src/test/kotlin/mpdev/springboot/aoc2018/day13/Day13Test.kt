@@ -60,6 +60,7 @@ class Day13Test {
     @Order(5)
     fun `Removes Crashes`() {
         val track = Track(inputPart2())
+        track.print()
         val lastPosition = track.runCarsAndRemoveCrashes(true)
         println(lastPosition)
         assertThat(lastPosition).isEqualTo(Point(6,4))
