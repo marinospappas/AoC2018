@@ -40,5 +40,4 @@ class Day13: PuzzleSolver() {
         }
         return PuzzlePartSolution(2, result, elapsed)
     }
-
 }

@@ -40,12 +40,15 @@ class Track(val input: List<String>) {
     fun runCarsAndRemoveCrashes(debug: Boolean = false): Point {
         repeat (1_000_000) { count ->
             if (cars.size > 1) {
-                for (car in cars) {
+                cars.forEach { car ->
+                    if (car.crashed)
+                        return@forEach
                     car.moveToNextPoint(grid)
                     val collisionMap = cars.groupBy { it.position }.filter { it.value.count() > 1 }
                     if (collisionMap.isNotEmpty())
-                        cars = cars.filterNot { collisionMap.keys.contains(it.position) }.toMutableList()
+                        cars.filter { collisionMap.keys.contains(it.position) }.forEach { it.crashed = true }
                 }
+                cars = cars.filterNot { it.crashed }.toMutableList()
                 cars.sortBy { car -> car.position }
                 if (debug) {
                     println("iteration $count")
