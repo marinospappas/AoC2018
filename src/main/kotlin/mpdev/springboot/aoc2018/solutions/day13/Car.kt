@@ -14,17 +14,13 @@ data class Car(var direction: CarDirection, var position: Point,
             TrackItem.STRAIGHT_V, TrackItem.STRAIGHT_H -> nextDirection = direction
             TrackItem.BEND1 ->
                 nextDirection = when (direction) {
-                    CarDirection.CAR_UP -> CarDirection.CAR_RIGHT
-                    CarDirection.CAR_RIGHT -> CarDirection.CAR_UP
-                    CarDirection.CAR_DOWN -> CarDirection.CAR_LEFT
-                    CarDirection.CAR_LEFT -> CarDirection.CAR_DOWN
+                    CarDirection.CAR_RIGHT, CarDirection.CAR_LEFT -> direction.turnLeft()
+                    CarDirection.CAR_UP, CarDirection.CAR_DOWN -> direction.turnRight()
                 }
             TrackItem.BEND2 ->
                 nextDirection = when (direction) {
-                    CarDirection.CAR_UP -> CarDirection.CAR_LEFT
-                    CarDirection.CAR_RIGHT -> CarDirection.CAR_DOWN
-                    CarDirection.CAR_DOWN -> CarDirection.CAR_RIGHT
-                    CarDirection.CAR_LEFT -> CarDirection.CAR_UP
+                    CarDirection.CAR_RIGHT, CarDirection.CAR_LEFT -> direction.turnRight()
+                    CarDirection.CAR_UP, CarDirection.CAR_DOWN -> direction.turnLeft()
                 }
             TrackItem.CROSS -> {
                 val newDirectionOfTurn = lastDirectionOfTurn.getNext()
