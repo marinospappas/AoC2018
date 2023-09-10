@@ -29,9 +29,7 @@ class Track(val input: List<String>) {
             }
             cars.sortBy { car -> car.position }
             if (debug) {
-                println("iteration $count")
-                print()
-                println(cars)
+                println("iteration ${count+1}"); print(); println(cars)
             }
         }
         return Point(-1,-1)
@@ -51,9 +49,7 @@ class Track(val input: List<String>) {
                 cars = cars.filterNot { it.crashed }.toMutableList()
                 cars.sortBy { car -> car.position }
                 if (debug) {
-                    println("iteration $count")
-                    print()
-                    println(cars)
+                    println("iteration ${count+1}"); print(); println(cars)
                 }
             }
             else
