@@ -38,24 +38,11 @@ class Recipes(input: List<String>) {
     fun getNumberOfRecipesBeforePattern(pattern: String): Int {
         makeRecipe()
         increaseIndices()
-        var count = 0
-        while (scores.subList(scores.size-pattern.length, scores.size).joinToString("") != pattern) {
+        while (!scores.takeLast(7).joinToString("").contains(pattern)) {
             makeRecipe()
             increaseIndices()
-            if (++count % 1000000 == 0)
-                println("count ${count}")
         }
-        return scores.size - pattern.length
-    }
-
-    fun part2() {
-        val scores = mutableListOf(3, 7)
-        var i = 0 to 1
-        while (numberOfRecipes.toString() !in scores.takeLast(10).joinToString("")) {
-            scores += (scores[i.first] + scores[i.second]).toString().map(Character::getNumericValue)
-            i = ((i.first + scores[i.first] + 1) % scores.size) to ((i.second + scores[i.second] + 1) % scores.size)
-        }
-        println(scores.joinToString("").indexOf(numberOfRecipes.toString()))
+        return scores.joinToString("").indexOf(pattern)
     }
 
     private fun nextIndex(i: Int) = (i + 1) % scores.size
