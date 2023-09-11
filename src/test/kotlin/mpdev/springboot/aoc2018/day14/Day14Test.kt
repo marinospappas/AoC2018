@@ -81,13 +81,6 @@ class Day14Test {
     }
 
     @Test
-    @Order(8)
-    fun `xxx`() {
-        val recipes = Recipes(listOf("165061"))
-        recipes.part2()
-    }
-
-    @Test
     @Order(7)
     fun `Solves Part 2`() {
         puzzleSolver.inputData = listOf("51589")
