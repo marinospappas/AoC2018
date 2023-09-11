@@ -10,7 +10,7 @@ class Recipes(input: List<String>) {
     }
 
     val numberOfRecipes = input[0].split(' ')[0].toInt()
-    val scores = StringBuilder().append(RECIPE_1).append(RECIPE_2)
+    val scores: StringBuilder = StringBuilder().append(RECIPE_1).append(RECIPE_2)
     val elfIndices = mutableListOf(0, 1)
 
     init {
