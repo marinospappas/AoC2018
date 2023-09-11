@@ -1,5 +1,7 @@
 package mpdev.springboot.aoc2018.solutions.day14
 
+import java.lang.StringBuilder
+
 class Recipes(input: List<String>) {
 
     companion object {
@@ -8,7 +10,7 @@ class Recipes(input: List<String>) {
     }
 
     val numberOfRecipes = input[0].split(' ')[0].toInt()
-    val scores = mutableListOf(RECIPE_1, RECIPE_2)
+    val scores = StringBuilder().append(RECIPE_1).append(RECIPE_2)
     val elfIndices = mutableListOf(0, 1)
 
     init {
@@ -16,34 +18,34 @@ class Recipes(input: List<String>) {
     }
 
     fun makeRecipe() {
-        val sum = (scores[elfIndices[0]] + scores[elfIndices[1]]).toString()
-        sum.toCharArray().forEach { c -> scores.add(c.digitToInt()) }
+        val sum = (scores[elfIndices[0]].digitToInt() + scores[elfIndices[1]].digitToInt()).toString()
+        sum.toCharArray().forEach { c -> scores.append(c.digitToInt()) }
     }
 
     fun increaseIndices() {
-        val increment = Array(2) { scores[elfIndices[it]] + 1 }
+        val increment = Array(2) { scores[elfIndices[it]].digitToInt() + 1 }
         increment.indices.forEach { i ->
             repeat(increment[i]) { elfIndices[i] = nextIndex(elfIndices[i]) }
         }
     }
 
     fun getNext10RecipesAfterRepeat(count: Int): String {
-        while(scores.size < count + 10) {
+        while(scores.length < count + 10) {
             makeRecipe()
             increaseIndices()
         }
-        return scores.subList(count, count+10).joinToString("")
+        return scores.toString().substring(count, count+10)
     }
 
     fun getNumberOfRecipesBeforePattern(pattern: String): Int {
         makeRecipe()
         increaseIndices()
-        while (!scores.takeLast(7).joinToString("").contains(pattern)) {
+        while (!scores.takeLast(7).contains(pattern)) {
             makeRecipe()
             increaseIndices()
         }
-        return scores.joinToString("").indexOf(pattern)
+        return scores.indexOf(pattern)
     }
 
-    private fun nextIndex(i: Int) = (i + 1) % scores.size
+    private fun nextIndex(i: Int) = (i + 1) % scores.length
 }

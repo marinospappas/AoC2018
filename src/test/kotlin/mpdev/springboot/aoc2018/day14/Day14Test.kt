@@ -40,13 +40,13 @@ class Day14Test {
         val recipes = Recipes(inputLines)
         println(recipes.scores)
         println(recipes.elfIndices)
-        while(recipes.scores.size < 19) {
+        while(recipes.scores.length < 19) {
             recipes.makeRecipe()
             recipes.increaseIndices()
             println(recipes.scores)
             println(recipes.elfIndices)
         }
-        assertThat(recipes.scores.subList(9,19)).isEqualTo(listOf(5,1,5,8,9,1,6,7,7,9))
+        assertThat(recipes.scores.toString().substring(9,19)).isEqualTo("5158916779")
     }
 
     @Test
