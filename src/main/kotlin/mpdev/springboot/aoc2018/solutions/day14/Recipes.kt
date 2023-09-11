@@ -19,14 +19,12 @@ class Recipes(input: List<String>) {
 
     fun makeRecipe() {
         val sum = (scores[elfIndices[0]].digitToInt() + scores[elfIndices[1]].digitToInt()).toString()
-        sum.toCharArray().forEach { c -> scores.append(c.digitToInt()) }
+        scores.append(sum)
     }
 
     fun increaseIndices() {
         val increment = Array(2) { scores[elfIndices[it]].digitToInt() + 1 }
-        increment.indices.forEach { i ->
-            repeat(increment[i]) { elfIndices[i] = nextIndex(elfIndices[i]) }
-        }
+        increment.indices.forEach { i -> elfIndices[i] = (elfIndices[i] + increment[i]) % scores.length }
     }
 
     fun getNext10RecipesAfterRepeat(count: Int): String {
@@ -46,6 +44,4 @@ class Recipes(input: List<String>) {
         }
         return scores.indexOf(pattern)
     }
-
-    private fun nextIndex(i: Int) = (i + 1) % scores.length
 }
