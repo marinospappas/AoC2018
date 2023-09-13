@@ -72,7 +72,7 @@ class Day16Test {
     @Order(4)
     fun `Builds Map of Matching OpCodes`() {
         val program = Program(inputLines)
-        program.buildMapOfMatchingOpCodes()
+        program.buildListOfMatchingOpCodes()
         program.matchingOpCodes.forEach { println(it) }
     }
 
@@ -85,6 +85,6 @@ class Day16Test {
     @Test
     @Order(7)
     fun `Solves Part 2`() {
-        assertThat(puzzleSolver.solvePart2().result).isEqualTo("")
+        println("solve part 2 not applicable - no test data")
     }
 }

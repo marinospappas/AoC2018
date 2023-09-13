@@ -28,14 +28,16 @@ class Day16: PuzzleSolver() {
 
     override fun solvePart1(): PuzzlePartSolution {
         val elapsed = measureTimeMillis {
-            program.buildMapOfMatchingOpCodes()
-            result = program.count3OrMore
+            program.buildListOfMatchingOpCodes()
+            result = program.matchingOpCodes.count { it.second.size >= 3 }
         }
         return PuzzlePartSolution(1, result.toString(), elapsed)
     }
 
     override fun solvePart2(): PuzzlePartSolution {
         val elapsed = measureTimeMillis {
+            program.identifyOpCodes()
+            program.executeProgram()
             result = Program.register[0]
         }
         return PuzzlePartSolution(2, result.toString(), elapsed)

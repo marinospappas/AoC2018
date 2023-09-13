@@ -1,11 +1,15 @@
 package mpdev.springboot.aoc2018.solutions.day16
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
 class Program(input: List<String>) {
+
+    private val log: Logger = LoggerFactory.getLogger(this::class.java)
 
     val samples = mutableListOf<Triple<List<Int>, Instruction, List<Int>>>()
     val code = mutableListOf<Instruction>()
-    val matchingOpCodes = mutableMapOf<Int,List<OpCode>>()
-    var count3OrMore = 0
+    val matchingOpCodes = mutableListOf<Pair<Int,MutableList<OpCode>>>()
 
     init {
         processInput(input)
@@ -16,20 +20,31 @@ class Program(input: List<String>) {
         const val NA = 99
     }
 
+    fun identifyOpCodes() {
+        while (matchingOpCodes.count { it.second.size > 1 } > 0) {
+            val matching1 = matchingOpCodes.filter { it.second.size == 1 }.distinct()
+            val matchingMoreThan1 = matchingOpCodes.filter { it.second.size > 1 }.toMutableList()
+            matching1.map { it.second }
+                .forEach { singleMatch -> matchingMoreThan1.forEach { it.second.remove(singleMatch.first()) } }
+        }
+        matchingOpCodes.filter { it.second.isNotEmpty() }.distinct().forEach { it.second.first().intCode = it.first }
+        OpCode.values().forEach { log.info("{}", it) }
+    }
+
+    fun executeProgram() {
+        IntArray(4){0}.copyInto(register)
+        code.forEach { instr -> executeStep(OpCode.getOpCodeFromInt(instr.intCode), instr.params) }
+    }
+
     fun executeStep(opCode: OpCode, params: List<Int>) {
         opCode.execute(params[0], params[1], params[2])
     }
 
-    fun buildMapOfMatchingOpCodes() {
-        samples.forEach { sample ->
-            val matches = findMatches(sample)
-            matchingOpCodes[sample.second.intCode] = matches
-            if (matches.size >= 3)
-                ++count3OrMore
-        }
+    fun buildListOfMatchingOpCodes() {
+        samples.forEach { sample -> matchingOpCodes.add(Pair(sample.second.intCode, findMatches(sample))) }
     }
 
-    fun findMatches(sample: Triple<List<Int>, Instruction, List<Int>>): List<OpCode> {
+    fun findMatches(sample: Triple<List<Int>, Instruction, List<Int>>): MutableList<OpCode> {
         val (before, instr, after) = sample
         val matches = mutableListOf<OpCode>()
         OpCode.values().forEach { opcode ->
@@ -59,7 +74,14 @@ class Program(input: List<String>) {
         gtrr(NA, { a, b, c -> register[c] = if (register[a] > register[b]) 1 else 0}),
         eqir(NA, { a, b, c -> register[c] = if (a == register[b]) 1 else 0}),
         eqri(NA, { a, b, c -> register[c] = if (register[a] == b) 1 else 0}),
-        eqrr(NA, { a, b, c -> register[c] = if (register[a] == register[b]) 1 else 0})
+        eqrr(NA, { a, b, c -> register[c] = if (register[a] == register[b]) 1 else 0});
+
+        override fun toString() = "OpCode($name ${intCode})"
+
+        companion object {
+            fun getOpCodeFromInt(intCode: Int) =
+                values().first { it.intCode == intCode }
+        }
     }
 
     private fun processInput(input: List<String>) {
