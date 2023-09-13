@@ -3,24 +3,6 @@ package mpdev.springboot.aoc2018.utils
 import java.lang.StringBuilder
 import kotlin.math.abs
 
-operator fun Point.plus(other: Point) =
-    Point(this.x + other.x, this.y + other.y)
-
-operator fun Point.times(n: Int) =
-    Point(n * this.x, n * this.y)
-
-operator fun Point.minus(other: Point) =
-    Point(this.x - other.x, this.y - other.y)
-
-fun Point.adjacent(): Array<Point> =
-    listOf(Point(-1,0), Point(-1,-1), Point(0,-1), Point(1,-1),
-        Point(1,0), Point(1,1), Point(0,1), Point(-1,1))
-        .map { this + it }
-        .toTypedArray()
-
-fun Point.manhattan(other: Point): Int =
-    abs(this.x - other.x) + abs(this.y - other.y)
-
 fun String.splitRepeatedChars(): List<String> {
     if (isEmpty())
         return emptyList()

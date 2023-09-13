@@ -3,7 +3,6 @@ package mpdev.springboot.aoc2018.solutions.day06
 import mpdev.springboot.aoc2018.utils.AocException
 import mpdev.springboot.aoc2018.utils.Grid
 import mpdev.springboot.aoc2018.utils.Point
-import mpdev.springboot.aoc2018.utils.manhattan
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
