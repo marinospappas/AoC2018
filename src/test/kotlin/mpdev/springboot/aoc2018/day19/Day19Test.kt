@@ -1,16 +1,16 @@
-package mpdev.springboot.aoc2018.day16
+package mpdev.springboot.aoc2018.day19
 
 import mpdev.springboot.aoc2018.input.InputDataReader
-import mpdev.springboot.aoc2018.solutions.day16.Day16
+import mpdev.springboot.aoc2018.solutions.day19.Day19
 import mpdev.springboot.aoc2018.solutions.intcodecomputer.Program
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class Day16Test {
+class Day19Test {
 
-    private val day = 16                                     ///////// Update this for a new dayN test
-    private val puzzleSolver = Day16()                      ///////// Update this for a new dayN test
+    private val day = 19                                     ///////// Update this for a new dayN test
+    private val puzzleSolver = Day19()                      ///////// Update this for a new dayN test
     private val inputDataReader = InputDataReader("src/test/resources/inputdata/input")
     private var inputLines: List<String> = inputDataReader.read(day)
 

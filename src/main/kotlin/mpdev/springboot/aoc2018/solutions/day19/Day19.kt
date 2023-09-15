@@ -1,4 +1,4 @@
-package mpdev.springboot.aoc2018.solutions.day16
+package mpdev.springboot.aoc2018.solutions.day19
 
 import mpdev.springboot.aoc2018.model.PuzzlePartSolution
 import mpdev.springboot.aoc2018.solutions.PuzzleSolver
@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component
 import kotlin.system.measureTimeMillis
 
 @Component
-class Day16: PuzzleSolver() {
+class Day19: PuzzleSolver() {
 
     final override fun setDay() {
         day = 16
