@@ -1,6 +1,6 @@
-package mpdev.springboot.aoc2018.solutions.intcodecomputer
+package mpdev.springboot.aoc2018.solutions.vmcomputer
 
-class Program(val code: List<Instruction> = listOf()) {
+class Program(var code: List<Instruction> = listOf()) {
 
     companion object {
         const val NUM_OF_REGISTERS = 5
@@ -9,8 +9,13 @@ class Program(val code: List<Instruction> = listOf()) {
         const val NA = 99
     }
 
-    fun executeProgram() {
+    private fun initRegisters() {
         IntArray(NUM_OF_REGISTERS){0}.copyInto(register)
+        ip = register[NUM_OF_REGISTERS-1]
+    }
+
+    fun executeProgram() {
+        initRegisters()
         while(ip < code.size) {
             val instr = code[ip]
             executeStep(instr.opCode, instr.params)

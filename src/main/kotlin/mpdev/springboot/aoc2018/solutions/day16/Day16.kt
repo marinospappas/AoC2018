@@ -2,7 +2,6 @@ package mpdev.springboot.aoc2018.solutions.day16
 
 import mpdev.springboot.aoc2018.model.PuzzlePartSolution
 import mpdev.springboot.aoc2018.solutions.PuzzleSolver
-import mpdev.springboot.aoc2018.solutions.intcodecomputer.Program
 import org.springframework.stereotype.Component
 import kotlin.system.measureTimeMillis
 
@@ -18,28 +17,28 @@ class Day16: PuzzleSolver() {
     }
 
     var result = 0
-    lateinit var program: Program
+    lateinit var programUtils: ProgramUtilsDay16
 
     override fun initSolver(): Pair<Long,String> {
         val elapsed = measureTimeMillis {
-            program = Program(inputData)
+            programUtils = ProgramUtilsDay16(inputData)
         }
         return Pair(elapsed, "milli-sec")
     }
 
     override fun solvePart1(): PuzzlePartSolution {
         val elapsed = measureTimeMillis {
-            program.buildListOfMatchingOpCodes()
-            result = program.matchingOpCodes.count { it.second.size >= 3 }
+            programUtils.buildListOfMatchingOpCodes()
+            result = programUtils.matchingOpCodes.count { it.second.size >= 3 }
         }
         return PuzzlePartSolution(1, result.toString(), elapsed)
     }
 
     override fun solvePart2(): PuzzlePartSolution {
         val elapsed = measureTimeMillis {
-            program.identifyOpCodes()
-            program.executeProgram()
-            result = Program.register[0]
+            programUtils.identifyOpCodes()
+            programUtils.executeProgram()
+            result = programUtils.getRegister()[0]
         }
         return PuzzlePartSolution(2, result.toString(), elapsed)
     }

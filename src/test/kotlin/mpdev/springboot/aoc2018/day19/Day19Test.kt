@@ -2,7 +2,7 @@ package mpdev.springboot.aoc2018.day19
 
 import mpdev.springboot.aoc2018.input.InputDataReader
 import mpdev.springboot.aoc2018.solutions.day19.Day19
-import mpdev.springboot.aoc2018.solutions.intcodecomputer.Program
+import mpdev.springboot.aoc2018.solutions.vmcomputer.Program
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.*
 
@@ -30,51 +30,9 @@ class Day19Test {
     @Test
     @Order(2)
     fun `Reads Input and sets up OpCodes`() {
-        val program = Program(inputLines)
-        program.samples.forEach { println(it) }
-        println()
-        program.code.forEach { println(it) }
-        assertThat((program.samples.size)).isEqualTo(2)
-        assertThat((program.code.size)).isEqualTo(5)
+
     }
 
-    @Test
-    @Order(3)
-    fun `Attempts to execute opcodes`() {
-        val program = Program(inputLines)
-        val (before, instr, after) = program.samples[0]
-        val matches = mutableListOf<Program.OpCode>()
-        Program.OpCode.values().forEach { opcode ->
-            before.toIntArray().copyInto(Program.register)
-            program.executeStep(opcode, instr.params)
-            print("${opcode.name}  ${Program.register.toList()}  ")
-            if (Program.register.toList() == after) {
-                print("****")
-                matches.add(opcode)
-            }
-            println()
-        }
-        println()
-        println(matches)
-        assertThat(matches).isEqualTo(listOf(Program.OpCode.addi, Program.OpCode.mulr, Program.OpCode.seti))
-    }
-
-    @Test
-    @Order(4)
-    fun `Finds Matching OpCodes`() {
-        val program = Program(inputLines)
-        val matches = program.findMatches(program.samples[0])
-        println(matches)
-        assertThat(matches).isEqualTo(listOf(Program.OpCode.addi, Program.OpCode.mulr, Program.OpCode.seti))
-    }
-
-    @Test
-    @Order(4)
-    fun `Builds Map of Matching OpCodes`() {
-        val program = Program(inputLines)
-        program.buildListOfMatchingOpCodes()
-        program.matchingOpCodes.forEach { println(it) }
-    }
 
     @Test
     @Order(6)

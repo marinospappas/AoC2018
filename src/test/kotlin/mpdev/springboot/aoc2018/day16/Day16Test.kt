@@ -2,7 +2,8 @@ package mpdev.springboot.aoc2018.day16
 
 import mpdev.springboot.aoc2018.input.InputDataReader
 import mpdev.springboot.aoc2018.solutions.day16.Day16
-import mpdev.springboot.aoc2018.solutions.intcodecomputer.Program
+import mpdev.springboot.aoc2018.solutions.day16.ProgramUtilsDay16
+import mpdev.springboot.aoc2018.solutions.vmcomputer.Program
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.*
 
@@ -30,25 +31,25 @@ class Day16Test {
     @Test
     @Order(2)
     fun `Reads Input and sets up OpCodes`() {
-        val program = Program(inputLines)
-        program.samples.forEach { println(it) }
+        val programUtils = ProgramUtilsDay16(inputLines)
+        programUtils.samples.forEach { println(it) }
         println()
-        program.code.forEach { println(it) }
-        assertThat((program.samples.size)).isEqualTo(2)
-        assertThat((program.code.size)).isEqualTo(5)
+        programUtils.codeDay16.forEach { println(it) }
+        assertThat((programUtils.samples.size)).isEqualTo(2)
+        assertThat((programUtils.codeDay16.size)).isEqualTo(5)
     }
 
     @Test
     @Order(3)
     fun `Attempts to execute opcodes`() {
-        val program = Program(inputLines)
-        val (before, instr, after) = program.samples[0]
+        val programUtils = ProgramUtilsDay16(inputLines)
+        val (before, instr, after) = programUtils.samples[0]
         val matches = mutableListOf<Program.OpCode>()
-        Program.OpCode.values().forEach { opcode ->
+        Program.OpCode.values().filterNot { it == Program.OpCode.nop }.forEach { opcode ->
             before.toIntArray().copyInto(Program.register)
-            program.executeStep(opcode, instr.params)
+            programUtils.program.executeStep(opcode, instr.params)
             print("${opcode.name}  ${Program.register.toList()}  ")
-            if (Program.register.toList() == after) {
+            if (programUtils.getRegister().toMutableList().also { it.removeLast() } == after) {
                 print("****")
                 matches.add(opcode)
             }
@@ -62,8 +63,8 @@ class Day16Test {
     @Test
     @Order(4)
     fun `Finds Matching OpCodes`() {
-        val program = Program(inputLines)
-        val matches = program.findMatches(program.samples[0])
+        val programUtils = ProgramUtilsDay16(inputLines)
+        val matches = programUtils.findMatches(programUtils.samples[0])
         println(matches)
         assertThat(matches).isEqualTo(listOf(Program.OpCode.addi, Program.OpCode.mulr, Program.OpCode.seti))
     }
@@ -71,9 +72,9 @@ class Day16Test {
     @Test
     @Order(4)
     fun `Builds Map of Matching OpCodes`() {
-        val program = Program(inputLines)
-        program.buildListOfMatchingOpCodes()
-        program.matchingOpCodes.forEach { println(it) }
+        val programUtils = ProgramUtilsDay16(inputLines)
+        programUtils.buildListOfMatchingOpCodes()
+        programUtils.matchingOpCodes.forEach { println(it) }
     }
 
     @Test

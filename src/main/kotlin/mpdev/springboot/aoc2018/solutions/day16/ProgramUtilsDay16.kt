@@ -1,6 +1,6 @@
 package mpdev.springboot.aoc2018.solutions.day16
 
-import mpdev.springboot.aoc2018.solutions.intcodecomputer.Program
+import mpdev.springboot.aoc2018.solutions.vmcomputer.Program
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -35,15 +35,23 @@ class ProgramUtilsDay16(input: List<String>) {
     fun findMatches(sample: Triple<List<Int>, InstrDay16, List<Int>>): MutableList<Program.OpCode> {
         val (before, instr, after) = sample
         val matches = mutableListOf<Program.OpCode>()
-        Program.OpCode.values().forEach { opcode ->
+        Program.OpCode.values().filterNot { it == Program.OpCode.nop }.forEach { opcode ->
             before.toIntArray().copyInto(Program.register)
             program.executeStep(opcode, instr.params)
-            // only the first 4 registers are compares - the 5th one is the ip
+            // only the first 4 registers are compared - the 5th one is the ip
             if (Program.register.toMutableList().also { it.removeLast() } == after)
                 matches.add(opcode)
         }
         return matches
     }
+
+    fun executeProgram() {
+        program.code = codeDay16.map { Program.Instruction(Program.OpCode.getOpCodeFromInt(it.intCode),
+            it.params) }
+        program.executeProgram()
+    }
+
+    fun getRegister() = Program.register
 
     private fun processInput(input: List<String>) {
         var processSamples = true
@@ -92,5 +100,5 @@ class ProgramUtilsDay16(input: List<String>) {
         }
     }
 
-    data class InstrDay16(val intCode:Int = 0, val params: List<Int> = listOf())
+    data class InstrDay16(val intCode: Int = 0, val params: List<Int> = listOf())
 }
