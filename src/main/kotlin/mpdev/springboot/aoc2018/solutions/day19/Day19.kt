@@ -36,7 +36,8 @@ class Day19: PuzzleSolver() {
 
     override fun solvePart2(): PuzzlePartSolution {
         val elapsed = measureTimeMillis {
-
+            programUtils.executeProgram(longArrayOf(1,0,0,0,0,0)) { programUtils.innerLoopByPass() }
+            result = programUtils.getRegister()[0]
         }
         return PuzzlePartSolution(2, result.toString(), elapsed)
     }

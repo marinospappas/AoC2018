@@ -45,8 +45,8 @@ class ProgramUtilsDay16(input: List<String>) {
     }
 
     fun executeProgram() {
-        program.code = codeDay16.map { Program.Instruction(Program.OpCode.getOpCodeFromInt(it.intCode),
-            it.params) }
+        program.code = codeDay16
+            .map { Program.Instruction(Program.OpCode.getOpCodeFromInt(it.intCode), it.params) }
         program.run()
     }
 

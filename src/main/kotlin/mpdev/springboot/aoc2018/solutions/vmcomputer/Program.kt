@@ -12,17 +12,22 @@ class Program(var code: List<Instruction> = listOf(), private val numRegisters: 
     var DEBUG = false
 
     init {
-        initRegisters()
+        initRegisters(LongArray(numRegisters){0})
     }
 
-    private fun initRegisters() {
+    private fun initRegisters(init: LongArray) {
         register = LongArray(numRegisters){0}
+        init.copyInto(register)
         ip = 0
     }
 
-    fun run() {
-        initRegisters()
+    fun run(initReg: LongArray = LongArray(numRegisters){0}, injectedCode: () -> Boolean = {false}) {
+        initRegisters(initReg)
         while(ip < code.size) {
+            if (injectedCode()) {    // the injected code may adjust the registers and the ip, bypassing parts of the code
+                ip = register[ipIndex].toInt()
+                continue
+            }
             val instr = code[ip]
             if (ipIndex >= 0)
                 register[ipIndex] = ip.toLong()
@@ -37,10 +42,8 @@ class Program(var code: List<Instruction> = listOf(), private val numRegisters: 
 
     fun executeStep(opCode: OpCode, params: List<Int>) {
         opCode.execute(params[0], params[1], params[2], register)
-        if (DEBUG) {
+        if (DEBUG)
             println("ip = $ip, executed ${opCode.name} $params, registers after exec. ${register.toList()}")
-            //readln()
-        }
     }
 
     data class Instruction(val opCode: OpCode = OpCode.nop, val params: List<Int> = listOf())

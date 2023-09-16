@@ -6,10 +6,14 @@ import org.slf4j.LoggerFactory
 
 class ProgramUtilsDay19(input: List<String>) {
 
+    companion object {
+        const val NUM_REGISTERS = 6
+    }
+
     private val log: Logger = LoggerFactory.getLogger(this::class.java)
 
     val codeDay19 = mutableListOf<Program.Instruction>()
-    val program = Program(codeDay19, 6)
+    val program = Program(codeDay19, NUM_REGISTERS)
     var ipIndex = 0
 
     init {
@@ -17,8 +21,24 @@ class ProgramUtilsDay19(input: List<String>) {
         program.ipIndex = ipIndex
     }
 
-    fun executeProgram() {
-        program.run()
+    fun executeProgram(regInit: LongArray = LongArray(NUM_REGISTERS){0}, injectedCode: () -> Boolean = {false}) {
+        program.run(regInit, injectedCode)
+    }
+
+    // part 2 bypass inner loop
+    fun innerLoopByPass(): Boolean {
+        val registers = program.register
+        val ip = registers[ipIndex].toInt()
+        if (ip == 3) {
+            if (registers[2] % registers[4] == 0L) {
+                log.info("found divisor {}", registers[4])
+                registers[0] += registers[4]
+            }
+            registers[ipIndex] = 12
+            return true
+        }
+        else
+            return false
     }
 
     fun getRegister() = program.register

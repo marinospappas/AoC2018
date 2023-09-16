@@ -47,6 +47,11 @@ class Day19Test {
     @Test
     @Order(7)
     fun `Solves Part 2`() {
-        println("solve part 2 not applicable - no test data")
+        val divisors = mutableListOf<Int>()
+        val n = 10551354
+        (1..n).forEach { i -> if (n % i == 0) divisors.add(i) }
+        println(divisors)
+        println(divisors.sum())
+        assertThat(divisors.sum()).isEqualTo(23021280)
     }
 }
