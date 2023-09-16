@@ -38,7 +38,7 @@ class Day16: PuzzleSolver() {
         val elapsed = measureTimeMillis {
             programUtils.identifyOpCodes()
             programUtils.executeProgram()
-            result = programUtils.getRegister()[0]
+            result = programUtils.getRegister()[0].toInt()
         }
         return PuzzlePartSolution(2, result.toString(), elapsed)
     }

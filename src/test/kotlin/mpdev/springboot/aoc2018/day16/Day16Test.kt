@@ -43,14 +43,14 @@ class Day16Test {
     @Order(3)
     fun `Attempts to execute opcodes`() {
         val programUtils = ProgramUtilsDay16(inputLines)
+        programUtils.program.DEBUG = true
         val (before, instr, after) = programUtils.samples[0]
         val matches = mutableListOf<Program.OpCode>()
         Program.OpCode.values().filterNot { it == Program.OpCode.nop }.forEach { opcode ->
-            before.toIntArray().copyInto(Program.register)
+            before.toLongArray().copyInto(programUtils.program.register)
             programUtils.program.executeStep(opcode, instr.params)
-            print("${opcode.name}  ${Program.register.toList()}  ")
-            if (programUtils.getRegister().toMutableList().also { it.removeLast() } == after) {
-                print("****")
+            if (programUtils.getRegister().toMutableList() == after) {
+                print("matched")
                 matches.add(opcode)
             }
             println()

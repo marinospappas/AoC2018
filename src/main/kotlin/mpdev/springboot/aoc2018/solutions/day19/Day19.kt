@@ -2,7 +2,6 @@ package mpdev.springboot.aoc2018.solutions.day19
 
 import mpdev.springboot.aoc2018.model.PuzzlePartSolution
 import mpdev.springboot.aoc2018.solutions.PuzzleSolver
-import mpdev.springboot.aoc2018.solutions.vmcomputer.Program
 import org.springframework.stereotype.Component
 import kotlin.system.measureTimeMillis
 
@@ -17,19 +16,20 @@ class Day19: PuzzleSolver() {
         setDay()
     }
 
-    var result = 0
-    lateinit var program: Program
+    var result = 0L
+    lateinit var programUtils: ProgramUtilsDay19
 
     override fun initSolver(): Pair<Long,String> {
         val elapsed = measureTimeMillis {
-            program = Program()
+            programUtils = ProgramUtilsDay19(inputData)
         }
         return Pair(elapsed, "milli-sec")
     }
 
     override fun solvePart1(): PuzzlePartSolution {
         val elapsed = measureTimeMillis {
-
+            programUtils.executeProgram()
+            result = programUtils.getRegister()[0]
         }
         return PuzzlePartSolution(1, result.toString(), elapsed)
     }

@@ -8,7 +8,7 @@ class ProgramUtilsDay16(input: List<String>) {
 
     private val log: Logger = LoggerFactory.getLogger(this::class.java)
 
-    val samples = mutableListOf<Triple<List<Int>, InstrDay16, List<Int>>>()
+    val samples = mutableListOf<Triple<List<Long>, InstrDay16, List<Long>>>()
     val matchingOpCodes = mutableListOf<Pair<Int,MutableList<Program.OpCode>>>()
     val program = Program()
     val codeDay16 = mutableListOf<InstrDay16>()
@@ -32,14 +32,13 @@ class ProgramUtilsDay16(input: List<String>) {
         samples.forEach { sample -> matchingOpCodes.add(Pair(sample.second.intCode, findMatches(sample))) }
     }
 
-    fun findMatches(sample: Triple<List<Int>, InstrDay16, List<Int>>): MutableList<Program.OpCode> {
+    fun findMatches(sample: Triple<List<Long>, InstrDay16, List<Long>>): MutableList<Program.OpCode> {
         val (before, instr, after) = sample
         val matches = mutableListOf<Program.OpCode>()
         Program.OpCode.values().filterNot { it == Program.OpCode.nop }.forEach { opcode ->
-            before.toIntArray().copyInto(Program.register)
+            before.toLongArray().copyInto(program.register)
             program.executeStep(opcode, instr.params)
-            // only the first 4 registers are compared - the 5th one is the ip
-            if (Program.register.toMutableList().also { it.removeLast() } == after)
+            if (program.register.toMutableList() == after)
                 matches.add(opcode)
         }
         return matches
@@ -48,16 +47,16 @@ class ProgramUtilsDay16(input: List<String>) {
     fun executeProgram() {
         program.code = codeDay16.map { Program.Instruction(Program.OpCode.getOpCodeFromInt(it.intCode),
             it.params) }
-        program.executeProgram()
+        program.run()
     }
 
-    fun getRegister() = Program.register
+    fun getRegister() = program.register
 
     private fun processInput(input: List<String>) {
         var processSamples = true
         var sampleLine = 1
-        var regBefore = listOf<Int>()
-        var regAfter: List<Int>
+        var regBefore = listOf<Long>()
+        var regAfter: List<Long>
         var instr =InstrDay16()
         var prevLine = ""
         input.forEach { line ->
@@ -74,7 +73,7 @@ class ProgramUtilsDay16(input: List<String>) {
                         // Before: [3, 2, 1, 1]
                         val match = Regex("""Before: \[(.+)]""").find(line)
                         val (registers) = match!!.destructured
-                        regBefore = registers.replace(" ", "").split(',').map { it.toInt() }
+                        regBefore = registers.replace(" ", "").split(',').map { it.toLong() }
                         ++sampleLine
                     }
 
@@ -88,7 +87,7 @@ class ProgramUtilsDay16(input: List<String>) {
                         // After: [3, 2, 1, 1]
                         val match = Regex("""After:  \[(.+)]""").find(line)
                         val (registers) = match!!.destructured
-                        regAfter = registers.replace(" ", "").split(',').map { it.toInt() }
+                        regAfter = registers.replace(" ", "").split(',').map { it.toLong() }
                         sampleLine = 1
                         samples.add(Triple(regBefore, instr, regAfter))
                     }

@@ -2,7 +2,7 @@ package mpdev.springboot.aoc2018.day19
 
 import mpdev.springboot.aoc2018.input.InputDataReader
 import mpdev.springboot.aoc2018.solutions.day19.Day19
-import mpdev.springboot.aoc2018.solutions.vmcomputer.Program
+import mpdev.springboot.aoc2018.solutions.day19.ProgramUtilsDay19
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.*
 
@@ -29,15 +29,19 @@ class Day19Test {
 
     @Test
     @Order(2)
-    fun `Reads Input and sets up OpCodes`() {
-
+    fun `Reads Input and sets up Program`() {
+        val programUtils = ProgramUtilsDay19(inputLines)
+        println("ip is mapped to reg ${programUtils.program.ipIndex}")
+        programUtils.program.code.forEach { println(it) }
+        assertThat(programUtils.program.ipIndex).isEqualTo(0)
+        assertThat(programUtils.program.code.size).isEqualTo(7)
     }
-
 
     @Test
     @Order(6)
     fun `Solves Part 1`() {
-        assertThat(puzzleSolver.solvePart1().result).isEqualTo("1")
+        puzzleSolver.programUtils.program.DEBUG = true
+        assertThat(puzzleSolver.solvePart1().result).isEqualTo("6")
     }
 
     @Test
