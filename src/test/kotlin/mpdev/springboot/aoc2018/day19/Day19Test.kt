@@ -38,6 +38,17 @@ class Day19Test {
     }
 
     @Test
+    @Order(3)
+    fun `Part 1 Divisors`() {
+        val divisors = mutableListOf<Int>()
+        val n = 954
+        (1..n).forEach { i -> if (n % i == 0) divisors.add(i) }
+        println(divisors)
+        println(divisors.sum())
+        assertThat(divisors.sum()).isEqualTo(2106)
+    }
+
+    @Test
     @Order(6)
     fun `Solves Part 1`() {
         puzzleSolver.programUtils.program.DEBUG = true
