@@ -21,10 +21,10 @@ class Program(var code: List<Instruction> = listOf(), private val numRegisters: 
         ip = 0
     }
 
-    fun run(initReg: LongArray = LongArray(numRegisters){0}, injectedCode: () -> Boolean = {false}) {
+    fun run(initReg: LongArray = LongArray(numRegisters){0}, bypassCode: () -> Boolean = {false}) {
         initRegisters(initReg)
         while(ip < code.size) {
-            if (injectedCode()) {    // the injected code may adjust the registers and the ip, bypassing parts of the code
+            if (bypassCode()) {    // the injected code may adjust the registers and the ip, bypassing parts of the code
                 ip = register[ipIndex].toInt()
                 continue
             }

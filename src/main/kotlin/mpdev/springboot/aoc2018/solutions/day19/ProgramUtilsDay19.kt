@@ -25,7 +25,7 @@ class ProgramUtilsDay19(input: List<String>) {
         program.run(regInit, injectedCode)
     }
 
-    // part 2 bypass inner loop
+    // part 2 bypass for inner loop
     fun innerLoopByPass(): Boolean {
         val registers = program.register
         val ip = registers[ipIndex].toInt()
