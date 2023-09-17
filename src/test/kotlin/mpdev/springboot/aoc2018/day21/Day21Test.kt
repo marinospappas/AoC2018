@@ -5,7 +5,6 @@ import mpdev.springboot.aoc2018.solutions.day21.Day21
 import mpdev.springboot.aoc2018.solutions.day21.ProgramUtilsDay21
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.*
-import java.time.Duration
 import java.util.concurrent.TimeUnit
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -61,12 +60,17 @@ class Day21Test {
     @Order(5)
     fun `Tests the program flow part 2`() {
         val programUtils = ProgramUtilsDay21(inputLines)
-        programUtils.executeProgram(LongArray(1) { 0 /*7516359*/ }, injectedCode =  { programUtils.injectedCodePart2() })
+        programUtils.program.breakpoint = { programUtils.breakPointP2() }
+        programUtils.executeProgram(injectedCode =  { programUtils.injectedCodePart2() })
+        programUtils.r1values.take(10).forEach { println(it) }
+        println("...")
+        programUtils.r1values.takeLast(10).forEach { println(it) }
+        assertThat(programUtils.r1values.last()).isEqualTo(11011493)
     }
 
     @Test
     @Order(7)
     fun `Solves Part 2`() {
-
+        assertThat(puzzleSolver.solvePart2().result).isEqualTo("11011493")
     }
 }

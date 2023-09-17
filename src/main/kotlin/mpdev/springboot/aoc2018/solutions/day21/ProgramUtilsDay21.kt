@@ -2,8 +2,6 @@ package mpdev.springboot.aoc2018.solutions.day21
 
 import mpdev.springboot.aoc2018.solutions.day19.ProgramUtilsDay19
 import mpdev.springboot.aoc2018.solutions.vmcomputer.Program
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 class ProgramUtilsDay21(input: List<String>) {
 
@@ -11,9 +9,9 @@ class ProgramUtilsDay21(input: List<String>) {
         const val NUM_REGISTERS = 6
     }
 
-    private val log: Logger = LoggerFactory.getLogger(this::class.java)
-
     var program = Program(input, ProgramUtilsDay19.NUM_REGISTERS)
+
+    val r1values = mutableListOf<Long>()
 
     fun executeProgram(regInit: LongArray = LongArray(NUM_REGISTERS){0}, injectedCode: () -> Boolean = {false}) {
         program.run(regInit, injectedCode)
@@ -23,12 +21,21 @@ class ProgramUtilsDay21(input: List<String>) {
     fun breakPointP1() =
         program.ip == 28    // instr: eqrr 1 0 5
 
+    // this breakpoint will stop the program when r1 values has been seen before at instr 28 - means that we are looping
     fun breakPointP2() =
-        program.ip == 28
+        program.ip == 28 && r1values.contains(program.register[1])
 
     fun injectedCodePart2(): Boolean {
-        if (program.ip == 28)
-            println("ip = ${program.ip}, ${program.code[program.ip].opCode.name} ${program.code[program.ip].params}, registers ${program.register.toList()}, exec.instr ${program.numberOfExecutedInstructions}")
+        when (program.ip) {
+            // at instr 28 collect all the r1 values
+            28 -> r1values.add(getRegister()[1])
+            // optimisation for steps 17 - 25 where effectively r5 = r4 / 256
+            17 -> {
+                program.register[5] = program.register[4] / 256
+                program.register[3] = 26
+                return true
+            }
+        }
         return false
     }
 

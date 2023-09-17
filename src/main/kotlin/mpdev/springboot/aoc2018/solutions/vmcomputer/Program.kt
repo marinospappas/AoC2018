@@ -29,17 +29,16 @@ class Program(input: List<String> = listOf(), private val numRegisters: Int = 4)
     fun run(initReg: LongArray = LongArray(numRegisters){0}, injectedCode: () -> Boolean = {false}) {
         initRegisters(initReg)
         while(ip < code.size) {
-            // the injected code may adjust the registers and the ip, bypassing parts of the code
+            if (breakpoint()) {    // breakpoint for debugging
+                println("ip = $ip, ${code[ip].opCode.name} ${code[ip].params}, registers ${register.toList()}, exec.instr $numberOfExecutedInstructions")
+                return
+            }    // the injected code may adjust the registers and the ip, bypassing parts of the code
             // if it returns true then skip execution of ths instruction and continue to next
             if (injectedCode()) {
                 ip = register[ipIndex].toInt()
                 continue
             }
             val instr = code[ip]
-            if (breakpoint()) {    // breakpoint for debugging
-                println("ip = $ip, ${instr.opCode.name} ${instr.params}, registers ${register.toList()}, exec.instr $numberOfExecutedInstructions")
-                return
-            }
             if (ipIndex >= 0)
                 register[ipIndex] = ip.toLong()
             executeStep(instr.opCode, instr.params)
