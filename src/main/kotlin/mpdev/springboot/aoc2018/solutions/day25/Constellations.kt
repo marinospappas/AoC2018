@@ -15,10 +15,10 @@ class Constellations(input: List<String>) {
             val newListToProcess = mutableListOf<PointND>()
             for (p in toProcess) {
                 var pProcessed = false
-                outerloop@ for (i in constList.indices) {
-                    for (p1 in constList[i]) {
+                outerloop@ for (constPts in constList) {
+                    for (p1 in constPts) {
                         if (p.manhattan(p1) <= 3) {
-                            constList[i].add(p)
+                            constPts.add(p)
                             pProcessed = true
                             break@outerloop
                         }
