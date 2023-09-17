@@ -1,17 +1,21 @@
 package mpdev.springboot.aoc2018.solutions.vmcomputer
 
-class Program(var code: List<Instruction> = listOf(), private val numRegisters: Int = 4) {
+class Program(input: List<String> = listOf(), private val numRegisters: Int = 4) {
 
     companion object {
         const val NA = 99
     }
 
+    var code: MutableList<Instruction> = mutableListOf()
     lateinit var register: LongArray
     var ip: Int = 0
     var ipIndex: Int = -1   // by default the ip is not linked to any of the main registers
     var DEBUG = false
+    var breakpoint: () -> Boolean = {false}
+    var numberOfExecutedInstructions = 0L
 
     init {
+        processInput(input)
         initRegisters(LongArray(numRegisters){0})
     }
 
@@ -19,19 +23,27 @@ class Program(var code: List<Instruction> = listOf(), private val numRegisters: 
         register = LongArray(numRegisters){0}
         init.copyInto(register)
         ip = 0
+        numberOfExecutedInstructions = 0
     }
 
-    fun run(initReg: LongArray = LongArray(numRegisters){0}, bypassCode: () -> Boolean = {false}) {
+    fun run(initReg: LongArray = LongArray(numRegisters){0}, injectedCode: () -> Boolean = {false}) {
         initRegisters(initReg)
         while(ip < code.size) {
-            if (bypassCode()) {    // the injected code may adjust the registers and the ip, bypassing parts of the code
+            // the injected code may adjust the registers and the ip, bypassing parts of the code
+            // if it returns true then skip execution of ths instruction and continue to next
+            if (injectedCode()) {
                 ip = register[ipIndex].toInt()
                 continue
             }
             val instr = code[ip]
+            if (breakpoint()) {    // breakpoint for debugging
+                println("ip = $ip, ${instr.opCode.name} ${instr.params}, registers ${register.toList()}, exec.instr $numberOfExecutedInstructions")
+                return
+            }
             if (ipIndex >= 0)
                 register[ipIndex] = ip.toLong()
             executeStep(instr.opCode, instr.params)
+            ++numberOfExecutedInstructions
             if (ipIndex >= 0)
                 ip = register[ipIndex].toInt()
             ++ip
@@ -73,6 +85,28 @@ class Program(var code: List<Instruction> = listOf(), private val numRegisters: 
         companion object {
             fun getOpCodeFromInt(intCode: Int) =
                 values().first { it.intCode == intCode }
+        }
+    }
+
+    private fun processInput(input: List<String>) {
+        var firstLine = true
+        input.forEach { line ->
+            when (firstLine) {
+                true -> {
+                    // #ip 0
+                    val match = Regex("""#ip (\d+)""").find(line)
+                    val (index) = match!!.destructured
+                    ipIndex = index.toInt()
+                    firstLine = false
+                }
+                false -> {
+                    // seti 5 0 1
+                    val list = line.split(' ').toList()
+                    code.add(Instruction(OpCode.valueOf(list[0]),
+                        list.subList(1, list.size).map { it.toInt() })
+                    )
+                }
+            }
         }
     }
 }
