@@ -33,10 +33,10 @@ class ProgramUtilsDay21(input: List<String>) {
             17 -> {
                 program.register[5] = program.register[4] / 256
                 program.register[3] = 26
-                return true
+                return true      // skip execution of the 256-loop section
             }
         }
-        return false
+        return false    // execute instruction as normal
     }
 
     fun getRegister() = program.register

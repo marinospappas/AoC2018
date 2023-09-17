@@ -42,7 +42,6 @@ class Program(input: List<String> = listOf(), private val numRegisters: Int = 4)
             if (ipIndex >= 0)
                 register[ipIndex] = ip.toLong()
             executeStep(instr.opCode, instr.params)
-            ++numberOfExecutedInstructions
             if (ipIndex >= 0)
                 ip = register[ipIndex].toInt()
             ++ip
@@ -53,8 +52,9 @@ class Program(input: List<String> = listOf(), private val numRegisters: Int = 4)
 
     fun executeStep(opCode: OpCode, params: List<Int>) {
         opCode.execute(params[0], params[1], params[2], register)
+        ++numberOfExecutedInstructions
         if (DEBUG)
-            println("ip = $ip, executed ${opCode.name} $params, registers after exec. ${register.toList()}")
+            println("ip = $ip, executed ${opCode.name} $params, registers after exec. ${register.toList()}, exec.instr $numberOfExecutedInstructions\"")
     }
 
     data class Instruction(val opCode: OpCode = OpCode.nop, val params: List<Int> = listOf())

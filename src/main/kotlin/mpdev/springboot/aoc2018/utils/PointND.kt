@@ -1,5 +1,7 @@
 package mpdev.springboot.aoc2018.utils
 
+import kotlin.math.abs
+
 /**
  * N-dimension Point
  * coordinates X(i) in array, the size of the array is the number of dimensions
@@ -29,6 +31,15 @@ data class PointND(var x_i: IntArray) {
 
     operator fun plus(other: PointND) = PointND(x_i + other.x_i)
 
+    fun manhattan(other: PointND): Int {
+        if (x_i.size != other.x_i.size)
+            return Int.MAX_VALUE
+        var sum = 0
+        for (i in x_i.indices)
+            sum += abs(x_i[i] - other.x_i[i])
+        return sum
+    }
+
     fun adjacent(): Set<PointND> {
         val ranges = Array(dimensions) { IntRange(-1,1) }
         val allZeroes = Array(dimensions) { 0 }.toList()
@@ -51,4 +62,6 @@ data class PointND(var x_i: IntArray) {
         result = 31 * result + dimensions
         return result
     }
+
+    override fun toString() = "Point${x_i.size}D${x_i.toList()}"
 }
