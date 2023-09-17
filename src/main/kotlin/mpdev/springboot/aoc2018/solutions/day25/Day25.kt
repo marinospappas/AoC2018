@@ -35,9 +35,6 @@ class Day25: PuzzleSolver() {
     }
 
     override fun solvePart2(): PuzzlePartSolution {
-        val elapsed = measureTimeMillis {
-
-        }
-        return PuzzlePartSolution(2, result.toString(), elapsed)
+        return PuzzlePartSolution(2, "AoC 2018 Finished", 0)
     }
 }

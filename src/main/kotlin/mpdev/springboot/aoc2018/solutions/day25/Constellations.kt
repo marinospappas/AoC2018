@@ -10,39 +10,26 @@ class Constellations(input: List<String>) {
 
     fun identifyConstellations() {
         constList = mutableListOf(mutableListOf(data.first()))
-        while (constPoints.isNotEmpty()) {
-            for (c in constList) {
-                var newPoint: PointND? = null
-                for (p1 in c) {
-                    for (p in constPoints) {
-                        newPoint = p
+        var toProcess = data.toMutableList().also{ it.removeFirst() }
+        while (toProcess.isNotEmpty()) {
+            val newListToProcess = mutableListOf<PointND>()
+            for (p in toProcess) {
+                var pProcessed = false
+                outerloop@ for (i in constList.indices) {
+                    for (p1 in constList[i]) {
                         if (p.manhattan(p1) <= 3) {
-                            c.add(p)
-                            constPoints.remove(p)
-                            newPoint = null
-                            break
+                            constList[i].add(p)
+                            pProcessed = true
+                            break@outerloop
                         }
                     }
                 }
+                if (!pProcessed)
+                    newListToProcess.add(p)
             }
-
-            val constPoints = data.toMutableList().also { it.removeFirst() }
-            while (constPoints.isNotEmpty()) {
-                var addedToExisting = false
-                constPoints.forEach { p ->
-                    for (i in constList.indices) {
-                        for (j in constList[i].indices) {
-                            if (p.manhattan(constList[i][j]) <= 3) {
-                                constList[i].add(p)
-                                addedToExisting = true
-                                break
-                            }
-                        }
-                    }
-                }
-                if (!addedToExisting)
-                    constList.add(mutableListOf(p))
-            }
+            if (newListToProcess == toProcess)  // this is the case where none of the remaining points belong to any identified constellation
+                constList.add(mutableListOf(newListToProcess.removeFirst()))    // in this case add a new constellation
+            toProcess = newListToProcess
         }
     }
 }
