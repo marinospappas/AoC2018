@@ -21,7 +21,7 @@ class ProgramUtilsDay21(input: List<String>) {
     fun breakPointP1() =
         program.ip == 28    // instr: eqrr 1 0 5
 
-    // this breakpoint will stop the program when r1 values has been seen before at instr 28 - means that we are looping
+    // this breakpoint will stop the program when the r1 value has been seen before at instr 28 - means that we are looping
     fun breakPointP2() =
         program.ip == 28 && r1values.contains(program.register[1])
 
