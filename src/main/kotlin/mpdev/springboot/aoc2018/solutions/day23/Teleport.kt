@@ -2,11 +2,12 @@ package mpdev.springboot.aoc2018.solutions.day23
 
 import mpdev.springboot.aoc2018.utils.AocException
 import mpdev.springboot.aoc2018.utils.PointND
-import kotlin.math.abs
 
 class Teleport(input: List<String>) {
 
     val nanobots = mutableListOf<Pair<PointND,Int>>()
+    val refPoint = PointND(intArrayOf(0,0,0))
+
     init {
         processInput(input)
     }
@@ -15,7 +16,7 @@ class Teleport(input: List<String>) {
 
     fun findNanobotsInRange(nanobot: Pair<PointND,Int>) = nanobots.filter { it.first.manhattan(nanobot.first) <= nanobot.second }.toList()
 
-    fun findPointInRangeOfMost(): Int {
+    fun findPointInRangeOfMost(): Int {     // based on an idea from autid - translated from Fortran
         val nanobotOutOfRangeOfOthers = BooleanArray(nanobots.size) { false }
         while (true) {
             val outOfRangeCnt = IntArray(nanobots.size) { 0 }
@@ -37,9 +38,16 @@ class Teleport(input: List<String>) {
                     nanobotOutOfRangeOfOthers[i] = true
         }
         val distances = IntArray(nanobots.size) { 0 }
+        // here we have eliminated the nanobots that are not in range of any other nanobots
+        // we assume that the point we are looking for is in range off (most of) all the remaining nanobots
+        // if that point is p then for each nanobot n -> n.manhattan(p) < n.r
+        // however n.manhattan(p) = n.manhattan(ref) - p.manhattan(ref)
+        // which means n.manhattan(ref) - n.r is < p.manhattan(ref)
+        // but given that ref = (0,0,0) p.manhattan(ref) = the sum of x,y,z of the requested point
+        // by taking the max the values below we ensure that that point is in range of most nanobots
         for (i in nanobots.indices)
             if (!nanobotOutOfRangeOfOthers[i])
-                distances[i] = abs(nanobots[i].first.x_i.sum() - nanobots[i].second)
+                distances[i] = nanobots[i].first.manhattan(refPoint) - nanobots[i].second
         return distances.max()
     }
 
