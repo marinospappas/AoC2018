@@ -35,7 +35,7 @@ class Day23: PuzzleSolver() {
 
     override fun solvePart2(): PuzzlePartSolution {
         val elapsed = measureTimeMillis {
-
+            result = teleport.findPointInRangeOfMost()
         }
         return PuzzlePartSolution(2, result.toString(), elapsed)
     }
