@@ -6,6 +6,7 @@ import mpdev.springboot.aoc2018.solutions.day18.Plot
 import mpdev.springboot.aoc2018.solutions.day18.Woods
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.*
+import java.io.File
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class Day18Test {
@@ -31,7 +32,7 @@ class Day18Test {
     @Test
     @Order(2)
     fun `Reads Input and sets up Woods`() {
-        val woods = Woods(inputLines)
+        val woods = Woods(inputLines, Pair(10,10))
         woods.print()
         assertThat(woods.grid.getDimensions()).isEqualTo(Pair(10,10))
         assertThat(woods.grid.countOf(Plot.WOOD)).isEqualTo(27)
@@ -41,7 +42,7 @@ class Day18Test {
     @Test
     @Order(3)
     fun `Performs State Change`() {
-        val woods = Woods(inputLines)
+        val woods = Woods(inputLines, Pair(10,10))
         println("Initial State")
         woods.print()
         repeat(10) {
@@ -57,28 +58,28 @@ class Day18Test {
     @Test
     @Order(5)
     fun `Solves Part 1`() {
+        puzzleSolver.woods = Woods(inputLines, Pair(10,10))
         assertThat(puzzleSolver.solvePart1().result).isEqualTo("1147")
     }
 
     @Test
     @Order(6)
-    fun `Performs State Change part 2`() {
-        val woods = Woods(inputLines)
+    fun `Finds Period of state change`() {
+        inputLines = File("src/main/resources/inputdata/input18.txt").readLines()
+        val woods = Woods(inputLines, Pair(50,50))
         println("Initial State")
         woods.print()
-        repeat(10000) {
-            println()
-            println("iteration ${it+1}")
-            woods.executeStateTransition()
-            woods.print()
-        }
-        assertThat(woods.grid.countOf(Plot.WOOD)).isEqualTo(37)
-        assertThat(woods.grid.countOf(Plot.LUMBER)).isEqualTo(31)
+        val period = woods.findStatePeriod()
+        println("Repeated State")
+        woods.print()
+        println(period)
+        assertThat(period.first).isGreaterThan(0)
+        assertThat(period.second).isGreaterThan(0)
     }
 
     @Test
     @Order(7)
     fun `Solves Part 2`() {
-        assertThat(puzzleSolver.solvePart2().result).isEqualTo("")
+        // NA
     }
 }

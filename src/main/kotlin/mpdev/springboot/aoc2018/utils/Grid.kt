@@ -1,7 +1,10 @@
 package mpdev.springboot.aoc2018.utils
 
-open class Grid<T>(inputGridVisual: List<String> = emptyList(), private val mapper: Map<Char,T>,
-                   private val border: Int = 1, private val defaultChar: Char = '.') {
+open class Grid<T>(inputGridVisual: List<String> = emptyList(),
+                   private val mapper: Map<Char,T>,
+                   private val border: Int = 1,
+                   private val defaultChar: Char = '.',
+                   private val defaultSize: Pair<Int,Int> = Pair(-1,-1)) {
 
     protected var data = mutableMapOf<Point,T>()
     protected var maxX: Int = 0
@@ -18,29 +21,40 @@ open class Grid<T>(inputGridVisual: List<String> = emptyList(), private val mapp
         DEFAULT_CHAR = defaultChar
     }
 
-    constructor(gridData: Map<Point,T>, mapper: Map<Char,T>, border: Int = 1, defaultChar: Char = '.'):
-            this(mapper = mapper, border = border, defaultChar = defaultChar) {
+    constructor(gridData: Map<Point,T>, mapper: Map<Char,T>, border: Int = 1, defaultChar: Char = '.', defaultSize: Pair<Int,Int> = Pair(-1,-1)):
+            this(mapper = mapper, border = border, defaultChar = defaultChar, defaultSize = defaultSize) {
         data = gridData.toMutableMap()
         updateXYDimensions(border)
     }
 
-    constructor(inputGridXY: Set<String>, mapper: Map<Char,T>, border: Int = 1, defaultChar: Char = '.'):
-            this(mapper = mapper, border = border, defaultChar = defaultChar) {
+    constructor(inputGridXY: Set<String>, mapper: Map<Char,T>, border: Int = 1, defaultChar: Char = '.', defaultSize: Pair<Int,Int> = Pair(-1,-1)):
+            this(mapper = mapper, border = border, defaultChar = defaultChar, defaultSize = defaultSize) {
         processInputXY(inputGridXY)
         updateXYDimensions(border)
     }
 
-    constructor(inputGridXY: Array<Point>, mapper: Map<Char,T>, border: Int = 1, defaultChar: Char = '.'):
-            this(mapper = mapper, border = border, defaultChar = defaultChar) {
+    constructor(inputGridXY: Array<Point>, mapper: Map<Char,T>, border: Int = 1, defaultChar: Char = '.', defaultSize: Pair<Int,Int> = Pair(-1,-1)):
+            this(mapper = mapper, border = border, defaultChar = defaultChar, defaultSize = defaultSize) {
         processInputXY(inputGridXY)
         updateXYDimensions(border)
     }
 
     private fun updateXYDimensions(border: Int) {
-        maxX = data.keys.maxOf { it.x } + border
-        maxY = data.keys.maxOf { it.y } + border
-        minX = data.keys.minOf { it.x } - border
-        minY = data.keys.minOf { it.y } - border
+        if (defaultSize.first > 0 && defaultSize.second > 0) {
+            minX = 0
+            maxX = defaultSize.first - 1
+            minX = 0
+            maxY = defaultSize.second - 1
+        }
+        else if (data.isNotEmpty()) {
+            maxX = data.keys.maxOf { it.x } + border
+            maxY = data.keys.maxOf { it.y } + border
+            minX = data.keys.minOf { it.x } - border
+            minY = data.keys.minOf { it.y } - border
+        }
+        else {
+            maxX = 0; maxY = 0; minX = 0; minY = 0
+        }
     }
 
     fun getDataPoints() = data.toMap()

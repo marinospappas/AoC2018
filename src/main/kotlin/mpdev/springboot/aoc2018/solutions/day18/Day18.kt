@@ -21,7 +21,7 @@ class Day18: PuzzleSolver() {
 
     override fun initSolver(): Pair<Long,String> {
         val elapsed = measureTimeMillis {
-            woods = Woods(inputData)
+            woods = Woods(inputData, Pair(50,50))
         }
         return Pair(elapsed, "milli-sec")
     }
@@ -36,6 +36,10 @@ class Day18: PuzzleSolver() {
 
     override fun solvePart2(): PuzzlePartSolution {
         val elapsed = measureTimeMillis {
+            woods = Woods(inputData, Pair(50,50))
+            val (a, b) = woods.findStatePeriod()
+            repeat((1_000_000_000 - b) % a) { woods.executeStateTransition() }
+            result = woods.grid.countOf(Plot.WOOD) * woods.grid.countOf(Plot.LUMBER)
         }
         return PuzzlePartSolution(2, result.toString(), elapsed)
     }
