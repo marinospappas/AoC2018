@@ -17,15 +17,19 @@ class Day17: PuzzleSolver() {
     }
 
     var result = 0
+    lateinit var tank: Tank
 
     override fun initSolver(): Pair<Long,String> {
         val elapsed = measureTimeMillis {
+            tank = Tank(inputData)
         }
         return Pair(elapsed, "milli-sec")
     }
 
     override fun solvePart1(): PuzzlePartSolution {
         val elapsed = measureTimeMillis {
+            tank.fillTanks(tank.spring)
+            result = tank.grid.countOf(TankData.WATER) + tank.grid.countOf(TankData.DRIED)
         }
         return PuzzlePartSolution(1, result.toString(), elapsed)
     }
