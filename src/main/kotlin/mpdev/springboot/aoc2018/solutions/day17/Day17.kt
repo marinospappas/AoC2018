@@ -28,7 +28,7 @@ class Day17: PuzzleSolver() {
 
     override fun solvePart1(): PuzzlePartSolution {
         val elapsed = measureTimeMillis {
-            tank.fillTanks(tank.spring)
+            tank.fillTanks()
             result = tank.grid.countOf(TankData.WATER) + tank.grid.countOf(TankData.DRIED)
         }
         return PuzzlePartSolution(1, result.toString(), elapsed)

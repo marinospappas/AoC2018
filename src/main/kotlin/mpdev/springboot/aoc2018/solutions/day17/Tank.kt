@@ -9,13 +9,25 @@ class Tank(input: List<String>) {
     val spring = Point(500,0)
     val grid: Grid<TankData> = processInput(input)
 
-    fun fillTanks(start: Point) {
+   /* fun fillTanks(start: Point) {
         var overflowPts: List<Point> = emptyList()
         while (overflowPts.isEmpty()) {
             overflowPts = waterDrops(start)
         }
         this.print(); readln()
         overflowPts.forEach { newStart -> if (newStart.x >= 0) fillTanks(newStart) }
+    }*/
+
+    fun fillTanks() {
+        val queue = ArrayDeque<Point>()
+        queue.add(spring)
+        while (queue.isNotEmpty()) {
+            var overflowPts = emptyList<Point>()
+            val start = queue.removeFirst()
+            while (overflowPts.isEmpty())
+                overflowPts = waterDrops(start)
+            queue.addAll(overflowPts.filter { it.x >= 0 })
+        }
     }
 
     // follows water dropping, fills tank level and returns the overflow points(s) if tank full
@@ -29,9 +41,15 @@ class Tank(input: List<String>) {
         val overflowPoints = mutableListOf<Point>()
         while (curPoint.y < maxY) {
             val nextDataPoint = gridData[curPoint.below()]
-            if (nextDataPoint == null && curPoint.below().y < maxY)
+            if (nextDataPoint == null && curPoint.below().y < maxY) {
                 grid.setDataPoint(curPoint.below(), TankData.DRIED)
-            else if (nextDataPoint == TankData.WALL || nextDataPoint == TankData.WATER) {
+                return emptyList()
+            }
+            if (gridData[curPoint] == null && nextDataPoint == TankData.DRIED) {
+                grid.setDataPoint(curPoint, TankData.DRIED)     // water has reached here already - do nothing
+                return emptyList()
+            }
+            if (nextDataPoint == TankData.WALL || nextDataPoint == TankData.WATER) {
                 val (isWallLeft, leftPoint) = wallLeft(curPoint)
                 val (isWallRight, rightPoint) = wallRight(curPoint)
                 if (isWallLeft && isWallRight) {
@@ -85,7 +103,7 @@ class Tank(input: List<String>) {
         val maxX = grid.getMinMaxXY().x2
         val gridData = grid.getDataPoints()
         var curPoint = point
-        while (curPoint.x < maxX) {
+        while (curPoint.x <= maxX) {
             if (gridData[curPoint.below()] != TankData.WALL && gridData[curPoint.below()] != TankData.WATER)
                 return Pair(false, curPoint)
             if (gridData[curPoint.right()] == TankData.WALL)
