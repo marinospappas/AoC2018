@@ -8,26 +8,23 @@ class Tank(input: List<String>) {
 
     val spring = Point(500,0)
     val grid: Grid<TankData> = processInput(input)
+    val MINY: Int
 
-   /* fun fillTanks(start: Point) {
-        var overflowPts: List<Point> = emptyList()
-        while (overflowPts.isEmpty()) {
-            overflowPts = waterDrops(start)
-        }
-        this.print(); readln()
-        overflowPts.forEach { newStart -> if (newStart.x >= 0) fillTanks(newStart) }
-    }*/
+    init {
+        MINY = grid.getDataPoints().filter { it.value == TankData.WALL }.keys.minOf { it.y }
+    }
 
     fun fillTanks() {
-        val queue = ArrayDeque<Point>()
+        val queue = ArrayList<Point>()
         queue.add(spring)
         while (queue.isNotEmpty()) {
             var overflowPts = emptyList<Point>()
             val start = queue.removeFirst()
             while (overflowPts.isEmpty())
                 overflowPts = waterDrops(start)
-            queue.addAll(overflowPts.filter { it.x >= 0 })
+            overflowPts.filter { it.x >= 0 }.forEach { if (!queue.contains(it)) queue.add(it) }
         }
+        this.print()
     }
 
     // follows water dropping, fills tank level and returns the overflow points(s) if tank full
@@ -45,7 +42,7 @@ class Tank(input: List<String>) {
                 grid.setDataPoint(curPoint.below(), TankData.DRIED)
                 return emptyList()
             }
-            if (gridData[curPoint] == null && nextDataPoint == TankData.DRIED) {
+            if (gridData[curPoint] == null && nextDataPoint == TankData.DRIED && curPoint.y >= MINY) {
                 grid.setDataPoint(curPoint, TankData.DRIED)     // water has reached here already - do nothing
                 return emptyList()
             }
@@ -60,14 +57,10 @@ class Tank(input: List<String>) {
                 else {
                     // overflow
                     grid.setDataPoint(curPoint, TankData.DRIED)
-                    if (!isWallLeft) {
+                    if (!isWallLeft)
                         overflowPoints.add(leftPoint)
-                        grid.setDataPoint(leftPoint, TankData.DRIED)
-                    }
-                    if (!isWallRight) {
+                    if (!isWallRight)
                         overflowPoints.add(rightPoint)
-                        grid.setDataPoint(rightPoint, TankData.DRIED)
-                    }
                     fillLevel(leftPoint, rightPoint, TankData.DRIED)
                     return overflowPoints
                 }
@@ -153,7 +146,8 @@ enum class TankData(val value: Char) {
     SPRING('+'),
     WALL('#'),
     WATER('~'),
-    DRIED('|');
+    DRIED('|'),
+    X('X');
     companion object {
         val mapper: Map<Char,TankData> = values().associateBy { it.value }
     }

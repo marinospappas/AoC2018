@@ -29,13 +29,15 @@ class Day17: PuzzleSolver() {
     override fun solvePart1(): PuzzlePartSolution {
         val elapsed = measureTimeMillis {
             tank.fillTanks()
-            result = tank.grid.countOf(TankData.WATER) + tank.grid.countOf(TankData.DRIED)
+            result = tank.grid.countOf(TankData.WATER) +
+                    tank.grid.getDataPoints().filter { it.key.y >= tank.MINY && it.value == TankData.DRIED }.count()
         }
         return PuzzlePartSolution(1, result.toString(), elapsed)
     }
 
     override fun solvePart2(): PuzzlePartSolution {
         val elapsed = measureTimeMillis {
+            result = tank.grid.countOf(TankData.WATER)
         }
         return PuzzlePartSolution(2, result.toString(), elapsed)
     }

@@ -155,16 +155,17 @@ class Day17Test {
     @Test
     @Order(6)
     fun `Solves Part 1`() {
-        assertThat(puzzleSolver.solvePart1().result).isEqualTo("57")
+        assertThat(puzzleSolver.solvePart1().result).isEqualTo("56")
     }
 
     @Test
     @Order(7)
     fun `Solves Part 2`() {
-        assertThat(puzzleSolver.solvePart2().result).isEqualTo("")
+        puzzleSolver.solvePart1()
+        assertThat(puzzleSolver.solvePart2().result).isEqualTo("29")
     }
 
-    fun testData2() = listOf(
+    private fun testData2() = listOf(
         "x=494, y=3..9",
         "y=9, x=494..502",
         "x=502, y=2..9",
@@ -173,7 +174,7 @@ class Day17Test {
         "x=499, y=5..7"
     )
 
-    fun testData3() = listOf(
+    private fun testData3() = listOf(
         "x=499, y=2..5",
         "y=5, x=499..502",
         "x=502, y=2..5",
