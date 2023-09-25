@@ -40,37 +40,27 @@ class Day17Test {
 
     @Test
     @Order(3)
-    fun `Follows Water dropping and Settling in the Tanks`() {
+    fun `Follows Water flow and fills the Tanks`() {
         val tank = Tank(inputLines)
         println("Initial state")
         tank.print()
         println("Fill first tank")
-        var overflowPts: List<Point> = emptyList()
-        while (overflowPts.isEmpty()) {
-            overflowPts = tank.waterDrops(tank.spring)
-            tank.print()
-        }
+        var overflowPts: List<Point> = tank.waterFlow(tank.spring)
+        tank.print()
         println("Fill second tank")
         val start = overflowPts.first()
-        overflowPts = emptyList()
-        while (overflowPts.isEmpty()) {
-            overflowPts = tank.waterDrops(start)
-            tank.print()
-        }
+        overflowPts = tank.waterFlow(start)
+        tank.print()
         println("Second tank overflow")
         val start1 = overflowPts.first()
         val start2 = overflowPts.last()
-        overflowPts = emptyList()
-        while (overflowPts.isEmpty()) {
-            overflowPts = tank.waterDrops(start1)
-            tank.print()
-        }
-        overflowPts = emptyList()
-        while (overflowPts.isEmpty()) {
-            overflowPts = tank.waterDrops(start2)
-            tank.print()
-        }
-        assertThat(tank.grid.countOf(TankData.WATER) + tank.grid.countOf(TankData.DRIED)).isEqualTo(57)
+        overflowPts = tank.waterFlow(start1)
+        tank.print()
+        assertThat(overflowPts.first()).isEqualTo(Point(-1,-1))
+        overflowPts = tank.waterFlow(start2)
+        tank.print()
+        assertThat(overflowPts.first()).isEqualTo(Point(-1,-1))
+        assertThat(tank.grid.countOf(TankData.WATER) + tank.grid.countOf(TankData.DRIED)).isEqualTo(59)
     }
 
     @Test
@@ -80,76 +70,51 @@ class Day17Test {
         println("Initial state")
         tank.print()
         println("Fill first tank")
-        var overflowPts: List<Point> = emptyList()
-        while (overflowPts.isEmpty()) {
-            overflowPts = tank.waterDrops(tank.spring)
-            tank.print()
-        }
+        var overflowPts: List<Point> = tank.waterFlow(tank.spring)
+        tank.print()
         println("Fill inside tank")
         val start = overflowPts.first()
-        overflowPts = emptyList()
-        while (overflowPts.isEmpty()) {
-            overflowPts = tank.waterDrops(start)
-            tank.print()
-        }
+        overflowPts = tank.waterFlow(start)
+        tank.print()
         println("Inside tank overflow - fill rest of outside tank")
         val start1 = overflowPts.first()
-        overflowPts = emptyList()
-        while (overflowPts.isEmpty()) {
-            overflowPts = tank.waterDrops(start1)
-            tank.print()
-        }
+        overflowPts = tank.waterFlow(start1)
+        tank.print()
         println("Outside tank overflow")
         val start2 = overflowPts.last()
-        overflowPts = emptyList()
-        while (overflowPts.isEmpty()) {
-            overflowPts = tank.waterDrops(start2)
-            tank.print()
-        }
-        assertThat(tank.grid.countOf(TankData.WATER) + tank.grid.countOf(TankData.DRIED)).isEqualTo(52)
+        overflowPts = tank.waterFlow(start2)
+        tank.print()
+        assertThat(overflowPts.first()).isEqualTo(Point(-1,-1))
+        assertThat(tank.grid.countOf(TankData.WATER) + tank.grid.countOf(TankData.DRIED)).isEqualTo(53)
     }
 
     @Test
-    @Order(4)
+    @Order(5)
     fun `Fills Small Tank overlapping with Big Tank`() {
         val tank = Tank(testData3())
         println("Initial state")
         tank.print()
         println("Fill small tank")
-        var overflowPts: List<Point> = emptyList()
-        while (overflowPts.isEmpty()) {
-            overflowPts = tank.waterDrops(tank.spring)
-            tank.print()
-        }
+        var overflowPts: List<Point> = tank.waterFlow(tank.spring)
+        tank.print()
         println("Small Tank left side overflow - fill big tank")
         val start1 = overflowPts.first()
         val start2 = overflowPts.last()
-        overflowPts = emptyList()
-        while (overflowPts.isEmpty()) {
-            overflowPts = tank.waterDrops(start1)
-            tank.print()
-        }
+        overflowPts = tank.waterFlow(start1)
+        tank.print()
         println("Small Tank right side overflow - no tank is filled")
-        overflowPts = emptyList()
-        while (overflowPts.isEmpty()) {
-            overflowPts = tank.waterDrops(start2)
-            tank.print()
-        }
+        tank.waterFlow(start2)
+        tank.print()
         println("Big tank overflow")
         val start3 = overflowPts.first()
         val start4 = overflowPts.last()
-        overflowPts = emptyList()
-        while (overflowPts.isEmpty()) {
-            overflowPts = tank.waterDrops(start3)
-            tank.print()
-        }
-        overflowPts = emptyList()
-        while (overflowPts.isEmpty()) {
-            overflowPts = tank.waterDrops(start4)
-            tank.print()
-        }
+        overflowPts = tank.waterFlow(start3)
+        assertThat(overflowPts.first()).isEqualTo(Point(-1,-1))
         tank.print()
-        assertThat(tank.grid.countOf(TankData.WATER) + tank.grid.countOf(TankData.DRIED)).isEqualTo(74)
+        overflowPts = tank.waterFlow(start4)
+        assertThat(overflowPts.first()).isEqualTo(Point(-1,-1))
+        tank.print()
+        assertThat(tank.grid.countOf(TankData.WATER) + tank.grid.countOf(TankData.DRIED)).isEqualTo(76)
     }
 
     @Test

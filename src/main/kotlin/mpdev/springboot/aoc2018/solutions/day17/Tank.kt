@@ -8,66 +8,64 @@ class Tank(input: List<String>) {
 
     val spring = Point(500,0)
     val grid: Grid<TankData> = processInput(input)
-    val MINY: Int
+    val MINY: Int = grid.getDataPoints().filter { it.value == TankData.WALL }.keys.minOf { it.y }
 
-    init {
-        MINY = grid.getDataPoints().filter { it.value == TankData.WALL }.keys.minOf { it.y }
-    }
-
-    fun fillTanks() {
+    fun fillAllTanks() {
         val queue = ArrayList<Point>()
         queue.add(spring)
         while (queue.isNotEmpty()) {
-            var overflowPts = emptyList<Point>()
-            val start = queue.removeFirst()
-            while (overflowPts.isEmpty())
-                overflowPts = waterDrops(start)
+            val overflowPts = waterFlow(queue.removeFirst())
             overflowPts.filter { it.x >= 0 }.forEach { if (!queue.contains(it)) queue.add(it) }
         }
-        this.print()
     }
 
-    // follows water dropping, fills tank level and returns the overflow points(s) if tank full
-    fun waterDrops(fromPoint: Point): List<Point> {
+    fun waterFlow(fromPoint: Point): List<Point> {
         val (_,_,_, maxY) = grid.getMinMaxXY()
-        val gridData = grid.getDataPoints()
+        //val gridData = grid.getDataPoints()
         var curPoint = fromPoint
         // if start point is underwater move it above water - to support tank inside tank
-        while (gridData[curPoint] == TankData.WATER && curPoint.y > 0)
+        while (grid.getDataPoint(curPoint) == TankData.WATER && curPoint.y > 0)
             curPoint = curPoint.above()
-        val overflowPoints = mutableListOf<Point>()
         while (curPoint.y < maxY) {
-            val nextDataPoint = gridData[curPoint.below()]
-            if (nextDataPoint == null && curPoint.below().y < maxY) {
-                grid.setDataPoint(curPoint.below(), TankData.DRIED)
-                return emptyList()
-            }
-            if (gridData[curPoint] == null && nextDataPoint == TankData.DRIED && curPoint.y >= MINY) {
+            val nextDataPoint = grid.getDataPoint(curPoint.below())
+            if (grid.getDataPoint(curPoint) == null && nextDataPoint == TankData.DRIED) {
                 grid.setDataPoint(curPoint, TankData.DRIED)     // water has reached here already - do nothing
                 return emptyList()
             }
+            if (nextDataPoint == null) {
+                grid.setDataPoint(curPoint.below(), TankData.DRIED)
+            }
+            else
             if (nextDataPoint == TankData.WALL || nextDataPoint == TankData.WATER) {
-                val (isWallLeft, leftPoint) = wallLeft(curPoint)
-                val (isWallRight, rightPoint) = wallRight(curPoint)
-                if (isWallLeft && isWallRight) {
-                    // fill tank
-                    fillLevel(leftPoint, rightPoint, TankData.WATER)
-                    return emptyList()
-                }
-                else {
-                    // overflow
-                    grid.setDataPoint(curPoint, TankData.DRIED)
-                    if (!isWallLeft)
-                        overflowPoints.add(leftPoint)
-                    if (!isWallRight)
-                        overflowPoints.add(rightPoint)
-                    fillLevel(leftPoint, rightPoint, TankData.DRIED)
-                    return overflowPoints
-                }
+                return fillOneTank(curPoint)
             }
             curPoint = curPoint.below()
         }
-        return listOf(Point(-1,-1))
+        return listOf(Point(-1,-1))     // running off of the grid
+    }
+
+    private fun fillOneTank(fillPoint: Point): List<Point> {
+        var curPoint = fillPoint
+        val overflowPoints = mutableListOf<Point>()
+        while (curPoint.y >= 0 && overflowPoints.isEmpty()) {
+            val (isWallLeft, leftPoint) = wallLeft(curPoint)
+            val (isWallRight, rightPoint) = wallRight(curPoint)
+            if (isWallLeft && isWallRight) {
+                // fill tank
+                fillLevel(leftPoint, rightPoint, TankData.WATER)
+            }
+            else {
+                // overflow
+                grid.setDataPoint(curPoint, TankData.DRIED)
+                if (!isWallLeft)
+                    overflowPoints.add(leftPoint)
+                if (!isWallRight)
+                    overflowPoints.add(rightPoint)
+                fillLevel(leftPoint, rightPoint, TankData.DRIED)
+            }
+            curPoint = curPoint.above()
+        }
+        return overflowPoints
     }
 
     private fun fillLevel(left: Point, right: Point, fill: TankData) {
@@ -78,32 +76,30 @@ class Tank(input: List<String>) {
     // otherwise return the point to the left where the overflow starts
     private fun wallLeft(point: Point): Pair<Boolean,Point> {
         val minX = grid.getMinMaxXY().x1
-        val gridData = grid.getDataPoints()
         var curPoint = point
         while (curPoint.x >= minX) {
-            if (gridData[curPoint.below()] != TankData.WALL && gridData[curPoint.below()] != TankData.WATER)
+            if (grid.getDataPoint(curPoint.below()) != TankData.WALL && grid.getDataPoint(curPoint.below()) != TankData.WATER)
                 return Pair(false, curPoint)
-            if (gridData[curPoint.left()] == TankData.WALL)
+            if (grid.getDataPoint(curPoint.left()) == TankData.WALL)
                 return Pair(true, curPoint)
             curPoint = curPoint.left()
         }
-        return Pair(false,Point(-1,-1))
+        return Pair(false, Point(-1, -1))
     }
 
     // if there is a wall to the right, return the point to the right where the water ends
     // otherwise return the point to the right where the overflow starts
     private fun wallRight(point: Point): Pair<Boolean,Point> {
         val maxX = grid.getMinMaxXY().x2
-        val gridData = grid.getDataPoints()
         var curPoint = point
         while (curPoint.x <= maxX) {
-            if (gridData[curPoint.below()] != TankData.WALL && gridData[curPoint.below()] != TankData.WATER)
+            if (grid.getDataPoint(curPoint.below()) != TankData.WALL && grid.getDataPoint(curPoint.below()) != TankData.WATER)
                 return Pair(false, curPoint)
-            if (gridData[curPoint.right()] == TankData.WALL)
+            if (grid.getDataPoint(curPoint.right()) == TankData.WALL)
                 return Pair(true, curPoint)
             curPoint = curPoint.right()
         }
-        return Pair(false,Point(-1,-1))
+        return Pair(false, Point(-1, -1))
     }
 
     fun print() {
