@@ -10,6 +10,8 @@ class Graph<T>(var getConnections: (id: T) -> List<GraphNode<T>>? = { null } ) {
     operator fun get(id: T) = nodes[id] ?:
         throw AocException("node id [${id}] not found")
 
+    fun getOrNull(id: T) = nodes[id]
+
     fun addNode(id: T) {
         nodes[id] = GraphNode(id) { nodeId -> getConnections(nodeId) }
     }
