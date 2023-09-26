@@ -16,23 +16,27 @@ class Day20: PuzzleSolver() {
         setDay()
     }
 
-    var result = 0L
+    var result = 0
+    lateinit var maze: Maze
 
     override fun initSolver(): Pair<Long,String> {
         val elapsed = measureTimeMillis {
+            maze = Maze(inputData)
         }
         return Pair(elapsed, "milli-sec")
     }
 
     override fun solvePart1(): PuzzlePartSolution {
         val elapsed = measureTimeMillis {
+            maze.buildDataMapFromDirections()
+            result = maze.dataMap.maxBy{ it.value }.value
         }
         return PuzzlePartSolution(1, result.toString(), elapsed)
     }
 
     override fun solvePart2(): PuzzlePartSolution {
         val elapsed = measureTimeMillis {
-
+            result = maze.dataMap.filter{ it.value >= 1000 }.count()
         }
         return PuzzlePartSolution(2, result.toString(), elapsed)
     }

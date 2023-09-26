@@ -38,18 +38,21 @@ class Day20Test {
     @Order(2)
     fun `Builds Graph from directions`() {
         val maze = Maze(inputLines)
-        maze.buildGraphFromDirections()
+        maze.buildDataMapFromDirections()
+        maze.dataMap.forEach { (k,v) -> println("$k -> $v") }
+        println(maze.dataMap.maxBy { it.value }.value)
+        assertThat(maze.dataMap.maxBy { it.value }.value).isEqualTo(10)
     }
 
     @Test
     @Order(6)
     fun `Solves Part 1`() {
-        assertThat(puzzleSolver.solvePart1().result).isEqualTo("")
+        assertThat(puzzleSolver.solvePart1().result).isEqualTo("10")
     }
 
     @Test
     @Order(7)
     fun `Solves Part 2`() {
-        assertThat(puzzleSolver.solvePart2().result).isEqualTo("")
+        // NA -- assertThat(puzzleSolver.solvePart2().result).isEqualTo("")
     }
 }

@@ -1,33 +1,34 @@
 package mpdev.springboot.aoc2018.solutions.day20
 
-import mpdev.springboot.aoc2018.utils.Graph
-import mpdev.springboot.aoc2018.utils.GraphNode
 import mpdev.springboot.aoc2018.utils.Point
-import java.util.Stack
+import kotlin.math.min
+import mpdev.springboot.aoc2018.solutions.day20.Instruction.*
+import mpdev.springboot.aoc2018.solutions.day20.Instruction.Companion.LEFT_PAREN
+import mpdev.springboot.aoc2018.solutions.day20.Instruction.Companion.RIGHT_PAREN
+import mpdev.springboot.aoc2018.solutions.day20.Instruction.Companion.VERT_BAR
+
 
 class Maze(input: List<String>) {
 
     val directions = input.first().substring(1, input.first().lastIndex)
     val start = Point(0,0)
-    val graph = Graph<Point>().also { it.addNode(start) }
+    val dataMap = mutableMapOf(start to 0)
 
-    fun buildGraphFromDirections() {
-        var current = graph[start]
-        val stack = Stack<Point>()
-        directions.toCharArray().forEach { c ->
-            if (Instruction.allValues.contains(c)) {
-                val nextNodeId = Instruction.valueOf(c.toString()).move(current.nodeId)
-                if (graph.getOrNull(nextNodeId) == null)
-                    graph.addNode(nextNodeId)
-                graph.connectBothWays(current.nodeId, nextNodeId)
-            }
-            else when (c) {
-                '(' -> stack.push(current.nodeId)
-                '|' -> current = GraphNode(stack.pop())
-                ')' -> {}
+    fun buildDataMapFromDirections() {
+        var current = start
+        val queue = ArrayDeque<Point>()
+        for (c in directions) {
+            when (c.toString()) {
+                LEFT_PAREN -> queue.add(current)
+                RIGHT_PAREN -> current = queue.removeLast()
+                VERT_BAR -> current = queue.last()
+                N.name, E.name, S.name, W.name -> {
+                    val next = Instruction.valueOf(c.toString()).move(current)
+                    dataMap[next] = min(dataMap[next] ?: (dataMap[current]!!+1), dataMap[current]!! + 1)
+                    current = next
+                }
             }
         }
-
     }
 }
 
@@ -37,7 +38,9 @@ enum class Instruction(val move: (Point) -> Point) {
     E({p -> east(p)}),
     W({p -> west(p)});
     companion object {
-        val allValues = values().map{ it.name.first() }
+        const val LEFT_PAREN = "("
+        const val RIGHT_PAREN = ")"
+        const val VERT_BAR = "|"
     }
 }
 
