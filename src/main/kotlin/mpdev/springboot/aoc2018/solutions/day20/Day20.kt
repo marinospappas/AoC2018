@@ -28,8 +28,11 @@ class Day20: PuzzleSolver() {
 
     override fun solvePart1(): PuzzlePartSolution {
         val elapsed = measureTimeMillis {
-            maze.buildDataMapFromDirections()
-            result = maze.dataMap.values.max()
+            //maze.buildDataMapFromDirections()
+            //result = maze.dataMap.values.max()
+            maze.buildGraphFromDirections()
+            maze.calculateMinDistancesToAllNodes()
+            result = maze.distMap.values.max()
         }
         return PuzzlePartSolution(1, result.toString(), elapsed)
     }

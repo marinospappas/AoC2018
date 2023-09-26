@@ -5,6 +5,8 @@ import mpdev.springboot.aoc2018.solutions.day20.Day20
 import mpdev.springboot.aoc2018.solutions.day20.Maze
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.*
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class Day20Test {
@@ -36,11 +38,11 @@ class Day20Test {
 
     @Test
     @Order(2)
-    fun `Builds Graph from directions`() {
+    fun `Builds Points Map from directions`() {
         val maze = Maze(inputLines)
         maze.buildDataMapFromDirections()
         maze.dataMap.forEach { (k,v) -> println("$k -> $v") }
-        println(maze.dataMap.maxBy { it.value }.value)
+        println(maze.dataMap.values.max())
         assertThat(maze.dataMap.values.max()).isEqualTo(10)
     }
 
@@ -55,4 +57,21 @@ class Day20Test {
     fun `Solves Part 2`() {
         // NA -- assertThat(puzzleSolver.solvePart2().result).isEqualTo("")
     }
+
+    @ParameterizedTest
+    @CsvSource(
+        "^ENWWW(NEEE|SSE(EE|N))$",
+        "^ENNWSWW(NEWS|)SSSEEN(WNSE|)EE(SWEN|)NNN$"
+    )
+    @Order(8)
+    fun `Builds Graph from directions`(input: String) {
+        val maze = Maze(listOf(input))
+        maze.buildGraphFromDirections()
+        println(maze.graphToString())
+        maze.calculateMinDistancesToAllNodes()
+        maze.distMap.forEach { (k,v) -> println("$k -> $v") }
+        println(maze.distMap.values.max())
+        assertThat(maze.distMap.values.max()).isEqualTo(10)
+    }
+
 }

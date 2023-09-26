@@ -1,5 +1,6 @@
 package mpdev.springboot.aoc2018.solutions.day15
 
+import mpdev.springboot.aoc2018.utils.Point
 import java.io.File
 
 fun main(){
@@ -12,242 +13,115 @@ class TestDay15 {
     val day: Int = 15
     private val input = File("src/main/resources/inputdata/input15.txt").readLines()
 
-    private fun inputSpaceArray() = input.map { row -> row.map { c -> if (c == 'E' || c == 'G') '.' else c}}
-
-    enum class Type {
-        ELF,
-        GOBLIN
+    abstract class Fighter(var location: Point, val attackPower: Int = 3, var hp: Int = 300) {
+        abstract fun copy(attackPower: Int = 3): Fighter
     }
 
-    data class Fighter(val type: Type, var x: Int, var y: Int, var health : Int = 200, val attackPower : Int = 3) : Comparable<Fighter> {
-        fun getHit(amount: Int) {
-            health -= amount
-        }
+    class Elf(location: Point, attackPower: Int = 3) : Fighter(location, attackPower) {
+        override fun copy(attackPower: Int): Fighter = Elf(location, attackPower)
+    }
 
-        override fun compareTo(other: Fighter): Int =
-            if (this.y == other.y) {
-                this.x - other.x
-            } else {
-                this.y - other.y
+    class Goblin(location: Point) : Fighter(location) {
+        override fun copy(attackPower: Int): Fighter = Goblin(location)
+    }
+
+    private fun List<Fighter>.copy(elfPower: Int = 3) = this.map { it.copy(elfPower) }
+    private fun List<Fighter>.living() = this.filter { it.hp > 0 }
+    private fun Point.isFloor() = map[this.y][this.x] == ' '
+
+    private val map: Array<CharArray>
+    private val allFighters: List<Fighter>
+
+    init {
+        val lines = input
+        map = Array(lines.size) { CharArray(lines[0].length) { ' ' } }
+        allFighters = mutableListOf()
+        for (y in 0 until lines.size) {
+            for (x in 0 until lines[y].length) {
+                map[y][x] = if (lines[y][x] == '#') lines[y][x] else ' '
+                if (lines[y][x] == 'G') allFighters.add(Goblin(Point(x, y)))
+                else if (lines[y][x] == 'E') allFighters.add(Elf(Point(x, y)))
             }
-
-        fun positionAsPoint() = Point(x, y)
+        }
     }
 
-    private fun characterList(elfAttack : Int = 3) : List<Fighter> {
-        val out = mutableListOf<Fighter>()
+    private fun dijkstra(from: Point, to: Point, occupiedSquares: Collection<Point>): List<Point>? {
+        data class Distance(val distance: Int, val previous: Point? = null)
 
-        input.forEachIndexed { y, row ->
-            row.forEachIndexed { x, c ->
-                when (c) {
-                    'E' -> out.add(Fighter(Type.ELF, x, y, attackPower = elfAttack))
-                    'G' -> out.add(Fighter(Type.GOBLIN, x, y))
+        val visited = mutableSetOf<Point>()
+        val unvisited = mutableListOf<Point>()
+        val distances = mutableMapOf<Point, Distance>()
+        distances[from] = Distance(0)
+        var current = from
+        while (true) {
+            unvisited += current.adjacent(false).filter { it.isFloor() && it !in occupiedSquares && it !in unvisited && it !in visited }
+            for (pos in unvisited) {
+                val distance = distances[current]!!.distance + 1
+                if (distance < (distances[pos]?.distance ?: Int.MAX_VALUE)) distances[pos] = Distance(distance, current)
+            }
+            unvisited -= current
+            visited += current
+            if (current == to) {
+                val route = mutableListOf(to)
+                var distance = distances[to]!!
+                while (distance.previous != null) {
+                    route.add(distance.previous!!)
+                    distance = distances[distance.previous!!]!!
                 }
+                route.reverse()
+                return route.drop(1)
             }
-        }
-
-        return out
-    }
-
-    data class Point(val x: Int, val y: Int) : Comparable<Point> {
-        fun adjacent() = listOf(
-            Point(x, y-1),
-            Point(x-1, y),
-            Point(x+1, y),
-            Point(x, y+1)
-        )
-        override fun compareTo(other: Point): Int =
-            if (this.y == other.y) {
-                this.x - other.x
-            } else {
-                this.y - other.y
-            }
-    }
-
-    @Suppress("unused")
-    private fun List<List<Char>>.printPlayfield(fighters: List<Fighter>) : String {
-        val builder = StringBuilder()
-        this.forEachIndexed { y, list ->
-            val fightersInLine = mutableListOf<Fighter>()
-            list.forEachIndexed { x, c ->
-                val occupied = fighters.singleOrNull { f -> f.x == x && f.y == y }
-                if (occupied != null) {
-                    fightersInLine.add(occupied)
-                    when (occupied.type) {
-                        Type.ELF -> builder.append('E')
-                        Type.GOBLIN -> builder.append('G')
-                    }
-                } else {
-                    builder.append(c)
-                }
-            }
-            builder.append("  ")
-            fightersInLine.forEach { f ->
-                when (f.type) {
-                    Type.ELF -> builder.append('E')
-                    Type.GOBLIN -> builder.append('G')
-                }
-                builder.append('(')
-                builder.append(f.health)
-                builder.append("), ")
-            }
-            if (fightersInLine.isNotEmpty()) {
-                repeat(2) { builder.deleteCharAt(builder.lastIndex) }
-            }
-            builder.append('\n')
-        }
-        return builder.toString()
-    }
-
-    private fun Collection<Point>.getClosestTo(point: Point, arena: List<List<Char>>, fighters: List<Fighter>) : Point? {
-        if (point in this)
-            return point
-
-        val out = Array(arena.size) { IntArray(arena.first().size) }
-
-        arena.forEachIndexed { y, list ->
-            list.forEachIndexed { x, c ->
-                if (c == '#')
-                    out[y][x] = Int.MIN_VALUE
-            }
-        }
-
-        fighters
-            .filterNot { f -> f.x == point.x && f.y == point.y }
-            .forEach { fighter ->
-                out[fighter.y][fighter.x] = Int.MIN_VALUE
-            }
-
-        val queue = ArrayDeque<Point>()
-        queue.add(point)
-        var lastDistance = Int.MIN_VALUE
-
-        val found = mutableSetOf<Point>()
-
-        while(queue.isNotEmpty()) {
-            val cur = queue.removeFirst()
-
-            if (found.isNotEmpty() && lastDistance < out[cur.y][cur.x])
-                return found.min()
-
-            lastDistance = out[cur.y][cur.x]
-
-            cur.adjacent()
-                .filter { p -> p.y >= 0 && p.x >= 0 && p.y < arena.size && p.x < arena.first().size }
-                .filter { p -> out[p.y][p.x] != Int.MIN_VALUE }
-                .filter { p -> p != point }
-                .filter { p -> out[p.y][p.x] == 0 }
-                .forEach { p ->
-                    if (p in this)
-                        found.add(p)
-                    queue.add(p)
-                    out[p.y][p.x] = out[cur.y][cur.x] + 1
-                }
-        }
-
-        return found.min()
-    }
-
-    private fun Fighter.doTurn(arena: List<List<Char>>, fighters: List<Fighter>) : Fighter? {
-        val characters = fighters.sorted()
-
-        var toAttack = this.positionAsPoint().adjacent().let { adjacentPoints ->
-            characters
-                .filter { c -> c.type != this.type }
-                .filter { c -> adjacentPoints.any { p -> c.x == p.x && c.y == p.y } }
-                .minBy { c -> c.health }
-        }
-        if (toAttack == null) {
-            characters
-                .filter { other -> other.type != this.type }
-                .filterNot { other -> other === this }
-                .flatMap { other -> other.positionAsPoint().adjacent() }
-                .getClosestTo(this.positionAsPoint(), arena, fighters)?.let { closest ->
-                    this.positionAsPoint().adjacent()
-                        .getClosestTo(closest, arena, characters.filter { c -> c !== this })!!
-                        .let { newP ->
-                            this.y = newP.y
-                            this.x = newP.x
-                        }
-                }
-            toAttack = this.positionAsPoint().adjacent().let { adjacentPoints ->
-                characters
-                    .filter { c -> c.type != this.type }
-                    .filter { c -> adjacentPoints.any { p -> c.x == p.x && c.y == p.y } }
-                    .minBy { c -> c.health }
-            }
-        }
-
-        toAttack?.let { victim ->
-            victim.getHit(this.attackPower)
-            if (victim.health <= 0) {
-                return victim
-            }
+            current = unvisited.sortedBy { distances[it]!!.distance }.firstOrNull() ?: break
         }
         return null
     }
 
-    fun part1(): Any {
-        var characters = characterList().sorted()
-        val arena = inputSpaceArray()
+    data class Result(val rounds: Int, val survivors: List<Fighter>)
 
-        var counter = 0
-
-        loop@while (characters.any { c -> c.type == Type.GOBLIN } && characters.any { c -> c.type == Type.ELF }) {
-            val dead = mutableSetOf<Fighter>()
-            for (character in characters) {
-
-                if (characters.none { c -> c.type == Type.GOBLIN } || characters.none { c -> c.type == Type.ELF }) {
-                    break@loop
-                }
-
-                if (character in dead)
-                    continue
-
-                character.doTurn(arena, characters)
-                    ?.let { justDied ->
-                        dead.add(justDied)
-                        characters = characters.filter { c -> c !== justDied }
+    private fun fight(elfPower: Int): Result {
+        val fighters = allFighters.copy(elfPower)
+        var round = 0
+        main@ while (true) {
+            for (fighter in fighters.living().sortedBy { it.location }) {
+                if (fighter.hp <= 0) continue
+                val enemies = fighters.living().filter { (fighter is Goblin && it is Elf) || (fighter is Elf && it is Goblin) }
+                if (enemies.isEmpty()) break@main
+                var nearbyEnemies = enemies.filter { it.location in fighter.location.adjacent(false) }
+                if (nearbyEnemies.isEmpty()) {
+                    val occupiedSquares = fighters.living().map { it.location }.toSet()
+                    val nearest = enemies
+                        .flatMap { it.location.adjacent(false).toList() }
+                        .filter { it.isFloor() && it !in occupiedSquares }
+                        .toSet()
+                        .mapNotNull { dijkstra(fighter.location, it, occupiedSquares) }
+                        .sortedWith(compareBy({ it.size }, { it.last() }))
+                    if (nearest.isNotEmpty()) {
+                        fighter.location = nearest.first().first()
+                        nearbyEnemies = enemies.filter { it.location in fighter.location.adjacent(false) }
                     }
+                }
+                if (nearbyEnemies.isNotEmpty()) {
+                    nearbyEnemies.sortedWith(compareBy({ it.hp }, { it.location })).first().hp -= fighter.attackPower
+                }
             }
-            characters = characters.sorted()
-            counter++
+            round++
         }
-        return "${counter * characters.sumBy { c -> c.health }}"
+        return Result(round, fighters.living())
     }
 
-    fun part2(): Any {
-        var attack = 4
-        outer@while (true) {
-            var characters = characterList(attack++).sorted()
-            val arena = inputSpaceArray()
+    fun part1() {
+        val result = fight(3)
+        println(result.rounds * result.survivors.sumBy { it.hp })
+    }
 
-            var counter = 0
-
-            loop@while (characters.any { c -> c.type == Type.GOBLIN } && characters.any { c -> c.type == Type.ELF }) {
-                val dead = mutableSetOf<Fighter>()
-                for (character in characters) {
-                    if (characters.none { c -> c.type == Type.GOBLIN } || characters.none { c -> c.type == Type.ELF }) {
-                        break@loop
-                    }
-                    if (character in dead)
-                        continue
-
-                    if (
-                        character.doTurn(arena, characters)
-                            ?.let { justDied ->
-                                dead.add(justDied)
-                                characters = characters.filter { c -> c !== justDied }
-                                justDied.type == Type.ELF
-                            } == true
-                    ) { continue@outer }
-                }
-                characters = characters.sorted()
-                counter++
+    fun part2() {
+        var elfPower = 4
+        while (true) {
+            val result = fight(elfPower++)
+            if (result.survivors.first() is Elf && result.survivors.size == allFighters.filter { it is Elf }.size) {
+                println(result.rounds * result.survivors.sumBy { it.hp })
+                break
             }
-
-            return "${counter * characters.sumBy { c -> c.health }}"
         }
-
     }
 }
