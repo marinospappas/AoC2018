@@ -17,7 +17,7 @@ class Maze(input: List<String>) {
     fun buildDataMapFromDirections() {
         var current = start
         val queue = ArrayDeque<Point>()
-        for (c in directions) {
+        directions.toCharArray().forEach { c ->
             when (c.toString()) {
                 LEFT_PAREN -> queue.add(current)
                 RIGHT_PAREN -> current = queue.removeLast()
