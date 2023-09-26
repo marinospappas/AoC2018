@@ -29,7 +29,7 @@ class Day20: PuzzleSolver() {
     override fun solvePart1(): PuzzlePartSolution {
         val elapsed = measureTimeMillis {
             maze.buildDataMapFromDirections()
-            result = maze.dataMap.maxBy{ it.value }.value
+            result = maze.dataMap.values.max()
         }
         return PuzzlePartSolution(1, result.toString(), elapsed)
     }

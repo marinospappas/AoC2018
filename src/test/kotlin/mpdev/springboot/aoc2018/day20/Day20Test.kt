@@ -41,7 +41,7 @@ class Day20Test {
         maze.buildDataMapFromDirections()
         maze.dataMap.forEach { (k,v) -> println("$k -> $v") }
         println(maze.dataMap.maxBy { it.value }.value)
-        assertThat(maze.dataMap.maxBy { it.value }.value).isEqualTo(10)
+        assertThat(maze.dataMap.values.max()).isEqualTo(10)
     }
 
     @Test
