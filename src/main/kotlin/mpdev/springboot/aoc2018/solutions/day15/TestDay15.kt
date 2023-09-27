@@ -11,7 +11,7 @@ fun main(){
 class TestDay15 {
 
     val day: Int = 15
-    private val input = File("src/main/resources/inputdata/input15.txt").readLines()
+    private val input = File("src/test/resources/inputdata/input15.txt").readLines()
 
     abstract class Fighter(var location: Point, val attackPower: Int = 3, var hp: Int = 300) {
         abstract fun copy(attackPower: Int = 3): Fighter
@@ -109,18 +109,17 @@ class TestDay15 {
         return Result(round, fighters.living())
     }
 
-    fun part1() {
+    fun part1(): Int {
         val result = fight(3)
-        println(result.rounds * result.survivors.sumBy { it.hp })
+        return result.rounds * result.survivors.sumOf { it.hp }
     }
 
-    fun part2() {
+    fun part2(): Int {
         var elfPower = 4
         while (true) {
             val result = fight(elfPower++)
             if (result.survivors.first() is Elf && result.survivors.size == allFighters.filter { it is Elf }.size) {
-                println(result.rounds * result.survivors.sumBy { it.hp })
-                break
+                return result.rounds * result.survivors.sumOf { it.hp }
             }
         }
     }
