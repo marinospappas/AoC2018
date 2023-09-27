@@ -60,18 +60,21 @@ class Day20Test {
 
     @ParameterizedTest
     @CsvSource(
-        "^ENWWW(NEEE|SSE(EE|N))$",
-        "^ENNWSWW(NEWS|)SSSEEN(WNSE|)EE(SWEN|)NNN$"
+        "^WNE$, 3",
+        "^ENWWW(NEEE|SSE(EE|N))$, 10",
+        "^ENNWSWW(NEWS|)SSSEEN(WNSE|)EE(SWEN|)NNN$, 18",
+        "^ESSWWN(E|NNENN(EESS(WNSE|)SSS|WWWSSSSE(SW|NNNE)))$, 23",
+        "^WSSEESWWWNW(S|NENNEEEENN(ESSSSW(NWSW|SSEN)|WSWWN(E|WWS(E|SS))))$, 31"
     )
     @Order(8)
-    fun `Builds Graph from directions`(input: String) {
+    fun `Builds Graph from directions`(input: String, expected: Int) {
         val maze = Maze(listOf(input))
         maze.buildGraphFromDirections()
         println(maze.graphToString())
         maze.calculateMinDistancesToAllNodes()
         maze.distMap.forEach { (k,v) -> println("$k -> $v") }
         println(maze.distMap.values.max())
-        assertThat(maze.distMap.values.max()).isEqualTo(10)
+        assertThat(maze.distMap.values.max()).isEqualTo(expected)
     }
 
 }

@@ -35,7 +35,7 @@ class Maze(input: List<String>) {
         }
     }
 
-    /////////////// graph solution using BFS ///////////////////////
+    /////////////// solution using Graph and BFS ///////////////////////
 
     val graph = Graph<Point>()
     private val bfs = Bfs<Point>()

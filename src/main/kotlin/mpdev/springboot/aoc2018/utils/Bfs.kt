@@ -84,24 +84,20 @@ class Bfs<T> {
         }
     }
 
-    fun findMinDistanceOfAllNodesFromStart(start: Vertex<T>): Map<T, Int> {
-        val distances = mutableMapOf<T, Int>()
+    /**
+     * find the distances of all graph nodes from a start node
+     */
+    fun findMinDistanceOfAllNodesFromStart(start: Vertex<T>): Map<T,Int> {
+        val distances = mutableMapOf(start.getId() to 0)
         val queue = ArrayDeque<Vertex<T>>().also { it.add(start) }
-        //val visited = mutableListOf<Vertex<T>>().also { it.add(start) }
-        var dist = 0
         while (queue.isNotEmpty()) {
-            val nodesThisLevel = queue.size
-            for (count in 1..nodesThisLevel) {
-                val current = queue.removeFirst()
-                distances[current.getId()] = min(dist, distances[current.getId()] ?: Int.MAX_VALUE)
-                current.getConnectedNodes().forEach { connection ->
-                    //if (!visited.contains(connection)) {
-                       // visited.add(connection)
-                        queue.add(connection)
-                    //}
-                }
+            val current = queue.removeFirst()
+            current.getConnectedNodes().forEach { connection ->
+                distances[connection.getId()] = min(
+                    distances[current.getId()]!! + 1, distances[connection.getId()] ?: Int.MAX_VALUE
+                )
+                queue.add(connection)
             }
-            ++dist
         }
         return distances
     }
