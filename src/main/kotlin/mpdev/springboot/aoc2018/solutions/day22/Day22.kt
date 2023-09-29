@@ -28,7 +28,8 @@ class Day22: PuzzleSolver() {
 
     override fun solvePart1(): PuzzlePartSolution {
         val elapsed = measureTimeMillis {
-
+            cave.scanCave(cave.maxX, cave.maxY)
+            result = cave.calculateRiskLevel()
         }
         return PuzzlePartSolution(1, result.toString(), elapsed)
     }

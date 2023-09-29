@@ -12,7 +12,7 @@ class Day22Test {
 
     private val day = 22                                     ///////// Update this for a new dayN test
     private val puzzleSolver = Day22()                      ///////// Update this for a new dayN test
-    private val inputDataReader = InputDataReader("src/test/resources/inputdata/input")
+    private val inputDataReader = InputDataReader("src/main/resources/inputdata/input")
     private var inputLines: List<String> = inputDataReader.read(day)
 
     @BeforeEach
@@ -39,9 +39,20 @@ class Day22Test {
     }
 
     @Test
+    @Order(3)
+    fun `Scans Cave and calculates erosion`() {
+        val cave = Cave(inputLines)
+        cave.scanCave(15, 15)
+        cave.grid.print()
+        val riskLevel = cave.calculateRiskLevel()
+        println(riskLevel)
+        assertThat(riskLevel).isEqualTo(114)
+    }
+
+    @Test
     @Order(5)
     fun `Solves Part 1`() {
-        assertThat(puzzleSolver.solvePart1().result).isEqualTo("1147")
+        assertThat(puzzleSolver.solvePart1().result).isEqualTo("114")
     }
 
     @Test
