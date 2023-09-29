@@ -12,9 +12,9 @@ class Cave(input: List<String>) {
     var maxY = 0
 
     lateinit var grid: Grid<RegionType>
-    var geoIndexMap: Array<IntArray>
-    var erosionMap: Array<IntArray>
-    var dataMap = mutableMapOf<Point,RegionType>()
+    private var geoIndexMap: Array<IntArray>
+    private var erosionMap: Array<IntArray>
+    private var dataMap = mutableMapOf<Point,RegionType>()
 
     init {
         processInput(input)
@@ -44,9 +44,12 @@ class Cave(input: List<String>) {
         }
         geoIndexMap[target.y][target.x] = 0
         erosionMap[target.y][target.x] = geologicIndex(target.x, target.y)
-        // update grid
-        for (y in 0 until dimY)
-            for (x in 0 until dimX)
+        setupGrid()
+    }
+
+    private fun setupGrid() {
+        for (y in 0 until maxY)
+            for (x in 0 until maxX)
                 dataMap[Point(x,y)] = RegionType.fromErosion(erosionMap[y][x])
         grid = Grid(dataMap, RegionType.mapper, border = 0)
         grid.setDataPoint(start, RegionType.MOUTH)
@@ -54,30 +57,22 @@ class Cave(input: List<String>) {
         grid.updateDimensions()
     }
 
-    fun calculateRiskLevel(): Int {
-        /*return  grid.getDataPoints().filter { it.key.x <= target.x && it.key.y <= target.y }
-            .values.sumOf { it.ordinal }*/
-        var result = 0
-        for (x in 0 .. target.x)
-            for (y in 0 .. target.y)
-                result += dataMap[Point(x,y)]!!.ordinal
-        return result
-    }
+    fun calculateRiskLevel() = dataMap.filter { it.key.x <= target.x && it.key.y <= target.y }.values.sumOf { it.ordinal }
 
-    fun geologicIndex0(x: Int, y: Int): Int {
+    private fun geologicIndex0(x: Int, y: Int): Int {
         if (y == 0)
             return x * 16807
         return y * 48271
     }
 
-    fun geologicIndex(x: Int, y: Int): Int {
+    private fun geologicIndex(x: Int, y: Int): Int {
         if (x == target.x && y == target.y)
             return 0
         return erosionMap[y][x-1] * erosionMap[y-1][x]
     }
 
 
-    fun erosion(x: Int, y: Int) = (geoIndexMap[y][x] + depth) % 20183
+    private fun erosion(x: Int, y: Int) = (geoIndexMap[y][x] + depth) % 20183
 
     private fun processInput(input: List<String>) {
         // depth: 510
