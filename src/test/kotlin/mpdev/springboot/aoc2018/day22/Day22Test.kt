@@ -3,6 +3,9 @@ package mpdev.springboot.aoc2018.day22
 import mpdev.springboot.aoc2018.input.InputDataReader
 import mpdev.springboot.aoc2018.solutions.day22.Cave
 import mpdev.springboot.aoc2018.solutions.day22.Day22
+import mpdev.springboot.aoc2018.solutions.day22.GraphId
+import mpdev.springboot.aoc2018.solutions.day22.Tool
+import mpdev.springboot.aoc2018.utils.Bfs
 import mpdev.springboot.aoc2018.utils.Point
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.*
@@ -53,6 +56,19 @@ class Day22Test {
     @Order(5)
     fun `Solves Part 1`() {
         assertThat(puzzleSolver.solvePart1().result).isEqualTo("114")
+    }
+
+    @Test
+    @Order(6)
+    fun `Sets up Graph and calculates minimum path`() {
+        val cave = Cave(inputLines)
+        cave.scanCave(cave.maxX, cave.maxY)
+        cave.setupGraph()
+        cave.grid.print()
+        println(Bfs<GraphId>().graphToString(cave.graph, cave.graph[GraphId(cave.start, Tool.TORCH)]))
+        println(cave.graph.getNodes())
+        println(cave.graph.getConnections)
+        println(cave.graph.costs)
     }
 
     @Test

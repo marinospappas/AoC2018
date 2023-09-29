@@ -1,5 +1,6 @@
 package mpdev.springboot.aoc2018.solutions.day22
 
+import mpdev.springboot.aoc2018.utils.Graph
 import mpdev.springboot.aoc2018.utils.Grid
 import mpdev.springboot.aoc2018.utils.Point
 
@@ -16,6 +17,10 @@ class Cave(input: List<String>) {
     private var erosionMap: Array<IntArray>
     private var dataMap = mutableMapOf<Point,RegionType>()
 
+    companion object {
+        const val TOOL_SWAP_COST = 7
+    }
+
     init {
         processInput(input)
         maxX = target.x + target.x/2 + 1
@@ -23,6 +28,8 @@ class Cave(input: List<String>) {
         geoIndexMap = Array(maxY) { IntArray(maxX) { 0 } }
         erosionMap = Array(maxY) { IntArray(maxX) { 0 } }
     }
+
+    /////////////// part1
 
     fun scanCave(dimX: Int, dimY: Int) {
         // calculate values for first row and first column
@@ -71,8 +78,34 @@ class Cave(input: List<String>) {
         return erosionMap[y][x-1] * erosionMap[y-1][x]
     }
 
-
     private fun erosion(x: Int, y: Int) = (geoIndexMap[y][x] + depth) % 20183
+
+    ////////////// part 2
+
+    val graph = Graph<GraphId>()
+
+    fun setupGraph() {
+        dataMap[start] = RegionType.MOUTH
+        dataMap[target] = RegionType.TARGET
+        dataMap.forEach { (k,v) ->
+            v.tools.forEach { tool ->
+                graph.addNode(GraphId(k, tool))
+                addNeighboursAndCost(k, tool)
+            }
+        }
+    }
+
+    fun addNeighboursAndCost(point: Point, tool: Tool) {
+        point.adjacent(false).filter { it.x >= 0 && it.y >= 0 && it.x < maxX && it.y < maxY }.forEach { neighbour ->
+            dataMap[neighbour]!!.tools.forEach { newTool ->
+                graph.addNode(GraphId(neighbour, newTool))
+                graph.connect(GraphId(point, tool), GraphId(neighbour, newTool))
+                graph.updateCost(GraphId(point, tool), GraphId(neighbour, newTool), 1 + (if (tool != newTool) TOOL_SWAP_COST else 0))
+            }
+        }
+    }
+
+    //////////////////////
 
     private fun processInput(input: List<String>) {
         // depth: 510
@@ -86,15 +119,22 @@ class Cave(input: List<String>) {
     }
 }
 
-enum class RegionType(val value: Char) {
-    ROCKY('.'),
-    WET('='),
-    NARROW('|'),
-    MOUTH('M'),
-    TARGET('T');
+enum class RegionType(val value: Char, val tools: Set<Tool>) {
+    ROCKY('.', setOf(Tool.CLIMBING, Tool.TORCH)),
+    WET('=',  setOf(Tool.CLIMBING, Tool.NONE)),
+    NARROW('|',  setOf(Tool.NONE, Tool.TORCH)),
+    MOUTH('M', setOf(Tool.TORCH)),
+    TARGET('T', setOf(Tool.TORCH));
     companion object {
         val mapper: Map<Char, RegionType> = RegionType.values().associateBy { it.value }
         fun fromErosion(erosion: Int) = RegionType.values().first { it.ordinal == erosion % 3 }
     }
 }
 
+enum class Tool {
+    TORCH,
+    CLIMBING,
+    NONE
+}
+
+data class GraphId(val position: Point, val tool: Tool)
