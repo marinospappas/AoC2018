@@ -18,8 +18,8 @@ class Cave(input: List<String>) {
 
     init {
         processInput(input)
-        maxX = target.x + target.x/2
-        maxY = target.y + target.y/2
+        maxX = target.x + target.x/2 + 1
+        maxY = target.y + target.y/2 + 1
         geoIndexMap = Array(maxY) { IntArray(maxX) { 0 } }
         erosionMap = Array(maxY) { IntArray(maxX) { 0 } }
     }
@@ -41,7 +41,6 @@ class Cave(input: List<String>) {
                     geoIndexMap[y][x] = geologicIndex(x, y)
                     erosionMap[y][x] = erosion(x, y)
             }
-            println("done y = $y")
         }
         geoIndexMap[target.y][target.x] = 0
         erosionMap[target.y][target.x] = geologicIndex(target.x, target.y)
@@ -50,6 +49,8 @@ class Cave(input: List<String>) {
             for (x in 0 until dimX)
                 dataMap[Point(x,y)] = RegionType.fromErosion(erosionMap[y][x])
         grid = Grid(dataMap, RegionType.mapper, border = 0)
+        grid.setDataPoint(start, RegionType.MOUTH)
+        grid.setDataPoint(target, RegionType.TARGET)
         grid.updateDimensions()
     }
 
@@ -57,10 +58,9 @@ class Cave(input: List<String>) {
         /*return  grid.getDataPoints().filter { it.key.x <= target.x && it.key.y <= target.y }
             .values.sumOf { it.ordinal }*/
         var result = 0
-        val data = grid.getDataPoints()
         for (x in 0 .. target.x)
             for (y in 0 .. target.y)
-                result += data[Point(x,y)]!!.ordinal
+                result += dataMap[Point(x,y)]!!.ordinal
         return result
     }
 
@@ -70,7 +70,11 @@ class Cave(input: List<String>) {
         return y * 48271
     }
 
-    fun geologicIndex(x: Int, y: Int) = erosionMap[y][x-1] * erosionMap[y-1][x]
+    fun geologicIndex(x: Int, y: Int): Int {
+        if (x == target.x && y == target.y)
+            return 0
+        return erosionMap[y][x-1] * erosionMap[y-1][x]
+    }
 
 
     fun erosion(x: Int, y: Int) = (geoIndexMap[y][x] + depth) % 20183
