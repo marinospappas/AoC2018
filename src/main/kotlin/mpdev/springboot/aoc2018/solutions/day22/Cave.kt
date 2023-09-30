@@ -1,8 +1,6 @@
 package mpdev.springboot.aoc2018.solutions.day22
 
-import mpdev.springboot.aoc2018.utils.Graph
-import mpdev.springboot.aoc2018.utils.Grid
-import mpdev.springboot.aoc2018.utils.Point
+import mpdev.springboot.aoc2018.utils.*
 
 class Cave(input: List<String>) {
 
@@ -23,8 +21,8 @@ class Cave(input: List<String>) {
 
     init {
         processInput(input)
-        maxX = target.x + target.x/2 + 1
-        maxY = target.y + target.y/2 + 1
+        maxX = target.x + 5 * target.x
+        maxY = target.y + if (target.y > 100) target.y / 40 else target.y / 2
         geoIndexMap = Array(maxY) { IntArray(maxX) { 0 } }
         erosionMap = Array(maxY) { IntArray(maxX) { 0 } }
     }
@@ -90,19 +88,35 @@ class Cave(input: List<String>) {
         dataMap.forEach { (k,v) ->
             v.tools.forEach { tool ->
                 graph.addNode(GraphId(k, tool))
-                addNeighboursAndCost(k, tool)
+            }
+        }
+        addNeighboursAndCost()
+    }
+
+    private fun addNeighboursAndCost() {
+        dataMap.forEach { (point, v) ->
+            point.adjacent(false).filter { it.x >= 0 && it.y >= 0 && it.x < maxX && it.y < maxY }.forEach { neighbour ->
+                val allowedTools = v.tools intersect dataMap[neighbour]!!.tools
+                v.tools.forEach { tool ->
+                     allowedTools.forEach { newTool ->
+                        graph.connect(GraphId(point, tool), GraphId(neighbour, newTool))
+                        graph.updateCost(GraphId(point, tool), GraphId(neighbour, newTool), 1 + (if (tool != newTool) TOOL_SWAP_COST else 0))
+                    }
+                }
             }
         }
     }
 
-    fun addNeighboursAndCost(point: Point, tool: Tool) {
-        point.adjacent(false).filter { it.x >= 0 && it.y >= 0 && it.x < maxX && it.y < maxY }.forEach { neighbour ->
-            dataMap[neighbour]!!.tools.forEach { newTool ->
-                graph.addNode(GraphId(neighbour, newTool))
-                graph.connect(GraphId(point, tool), GraphId(neighbour, newTool))
-                graph.updateCost(GraphId(point, tool), GraphId(neighbour, newTool), 1 + (if (tool != newTool) TOOL_SWAP_COST else 0))
-            }
+    fun findMinPath(): Int {
+        val dijkstra = Dijkstra(graph.costs)
+        val a = graph[GraphId(start, Tool.TORCH)]
+        val b = graph[GraphId(target, Tool.TORCH)]
+        val minCostPath = dijkstra.runIt(a, b)
+        minCostPath.path.forEach { pair ->
+            if (grid.getDataPoint(pair.first.position) != RegionType.MOUTH && grid.getDataPoint(pair.first.position) != RegionType.TARGET)
+                grid.setDataPoint(pair.first.position, RegionType.PATH)
         }
+        return minCostPath.minCost
     }
 
     //////////////////////
@@ -124,7 +138,8 @@ enum class RegionType(val value: Char, val tools: Set<Tool>) {
     WET('=',  setOf(Tool.CLIMBING, Tool.NONE)),
     NARROW('|',  setOf(Tool.NONE, Tool.TORCH)),
     MOUTH('M', setOf(Tool.TORCH)),
-    TARGET('T', setOf(Tool.TORCH));
+    TARGET('T', setOf(Tool.TORCH)),
+    PATH('X', setOf());
     companion object {
         val mapper: Map<Char, RegionType> = RegionType.values().associateBy { it.value }
         fun fromErosion(erosion: Int) = RegionType.values().first { it.ordinal == erosion % 3 }

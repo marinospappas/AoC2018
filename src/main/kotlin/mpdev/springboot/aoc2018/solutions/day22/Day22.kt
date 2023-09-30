@@ -36,7 +36,10 @@ class Day22: PuzzleSolver() {
 
     override fun solvePart2(): PuzzlePartSolution {
         val elapsed = measureTimeMillis {
+            cave.setupGraph()
+            result = cave.findMinPath()
         }
+        cave.grid.print()
         return PuzzlePartSolution(2, result.toString(), elapsed)
     }
 }
