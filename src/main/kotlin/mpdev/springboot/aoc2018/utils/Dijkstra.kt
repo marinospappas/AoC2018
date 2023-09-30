@@ -5,6 +5,7 @@ import java.util.*
 /**
  * Dijkstra implementation
  * T is the type of the Node ID in the Graph
+ * the costMap can be provided by the caller, or else all costs default to 1
  */
 class Dijkstra<T>(private var costMap: Map<Pair<T,T>,Int>? = null) {
 
