@@ -10,10 +10,10 @@ class Cave(input: List<String>) {
     var maxX = 0
     var maxY = 0
 
-    lateinit var grid: Grid<RegionType>
     private var geoIndexMap: Array<IntArray>
     private var erosionMap: Array<IntArray>
     private var dataMap = mutableMapOf<Point,RegionType>()
+    lateinit var grid: Grid<RegionType>
 
     companion object {
         const val TOOL_SWAP_COST = 7
@@ -100,7 +100,8 @@ class Cave(input: List<String>) {
                 v.tools.forEach { tool ->
                      allowedTools.forEach { newTool ->
                         graph.connect(GraphId(point, tool), GraphId(neighbour, newTool))
-                        graph.updateCost(GraphId(point, tool), GraphId(neighbour, newTool), 1 + (if (tool != newTool) TOOL_SWAP_COST else 0))
+                        graph.updateCost(GraphId(point, tool), GraphId(neighbour, newTool),
+                            1 + (if (tool != newTool) TOOL_SWAP_COST else 0))
                     }
                 }
             }
