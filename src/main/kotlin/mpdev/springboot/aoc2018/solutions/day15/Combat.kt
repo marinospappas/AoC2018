@@ -32,7 +32,7 @@ class Combat(input: List<String>) {
                 val thisUnit = data[thisUnitPosition] ?: return@forEach
                 val targetUnitPositions = findTargetPostions(thisUnit.id, data).also { if (it.isEmpty()) return false }
                 var targetInRangePosition: Point?
-                if (findTargetInRange(thisUnitPosition, targetUnitPositions).also { targetInRangePosition = it } != null)
+                if (findTargetInRange(thisUnitPosition, targetUnitPositions, data).also { targetInRangePosition = it } != null)
                     unitAttacks(thisUnit, targetInRangePosition!!, data)
                 else
                     unitMoves(thisUnitPosition, thisUnit, targetUnitPositions, data)
@@ -45,8 +45,10 @@ class Combat(input: List<String>) {
         return data.entries.filter { e -> e.value.id == targetId }.map { it.key }
     }
 
-    fun findTargetInRange(thisPosition: Point, targetPositions: List<Point>) =
-        targetPositions.sorted().firstOrNull { thisPosition.adjacent(false).contains(it) }
+    fun findTargetInRange(thisPosition: Point, targetPositions: List<Point>, data: Map<Point,CombatUnit>) =
+        targetPositions.sortedWith{ p1, p2 -> if (data[p1]!!.hitPoints == data[p2]!!.hitPoints) p1.compareTo(p2) else
+            data[p1]!!.hitPoints.compareTo(data[p2]!!.hitPoints) }
+            .firstOrNull { thisPosition.adjacent(false).contains(it) }
 
     fun unitMoves(unitAPosition: Point, unitA: CombatUnit, enemyUnitsPositions: List<Point>, data: MutableMap<Point,CombatUnit>) {
         val stepToNearestInRange = stepToNearestInRangePosition(unitAPosition, enemyUnitsPositions, data) ?: return
