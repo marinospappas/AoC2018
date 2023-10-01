@@ -83,16 +83,58 @@ class Day15Test {
         repeat(3) {
             val data = combat.grid.getDataPoints().entries.groupingBy { it.key }
                 .aggregate { _, _: CombatUnit?, element, _ -> CombatUnit(element.value) }
-            val (result, nextRound) = combat.doRound(data)
-            combat.grid = Grid(nextRound.entries.groupingBy { it.key }
+                .toMutableMap()
+            combat.doRound(data)
+            combat.grid = Grid(data.entries.groupingBy { it.key }
                 .aggregate { _, _: AreaId?, element, _ -> element.value.id }, AreaId.mapper, border = 0)
             println("after ${it+1} round(s)")
             combat.grid.print()
         }
+        assertThat(combat.grid.getDataPoint(Point(3,2))).isEqualTo(AreaId.GOBLIN)
+        assertThat(combat.grid.getDataPoint(Point(4,2))).isEqualTo(AreaId.GOBLIN)
+        assertThat(combat.grid.getDataPoint(Point(5,2))).isEqualTo(AreaId.GOBLIN)
+        assertThat(combat.grid.getDataPoint(Point(3,3))).isEqualTo(AreaId.GOBLIN)
+        assertThat(combat.grid.getDataPoint(Point(4,3))).isEqualTo(AreaId.ELF)
+        assertThat(combat.grid.getDataPoint(Point(5,3))).isEqualTo(AreaId.GOBLIN)
+        assertThat(combat.grid.getDataPoint(Point(1,4))).isEqualTo(AreaId.GOBLIN)
+        assertThat(combat.grid.getDataPoint(Point(4,4))).isEqualTo(AreaId.GOBLIN)
+        assertThat(combat.grid.getDataPoint(Point(7,5))).isEqualTo(AreaId.GOBLIN)
     }
 
     @Test
     @Order(5)
+    fun `Plays Combat`() {
+        val thisInput = listOf(
+            "#######",
+            "#.G...#",
+            "#...EG#",
+            "#.#.#G#",
+            "#..G#E#",
+            "#.....#",
+            "#######"
+        )
+        Combat.DEBUG = false
+        val combat = Combat(thisInput)
+        combat.grid.print()
+        val data = combat.grid.getDataPoints().entries.groupingBy { it.key }
+            .aggregate { _, _: CombatUnit?, element, _ -> CombatUnit(element.value) }
+            .toMutableMap()
+        var count = 0
+        while (true) {
+            if (!combat.doRound(data))
+                break
+            combat.grid = Grid(data.entries.groupingBy { it.key }
+                .aggregate { _, _: AreaId?, element, _ -> element.value.id }, AreaId.mapper, border = 0)
+            println("after ${++count} round(s)")
+            combat.grid.print()
+            data.filterNot { it.value.id == AreaId.WALL }.forEach { println(it) }
+        }
+        assertThat(count-1).isEqualTo(47)
+        assertThat(data.filterNot { it.value.id == AreaId.WALL }.values.sumOf { it.hitPoints }).isEqualTo(590)
+    }
+
+    @Test
+    @Order(6)
     fun `Solves Part 1`() {
         assertThat(puzzleSolver.solvePart1().result).isEqualTo("")
     }

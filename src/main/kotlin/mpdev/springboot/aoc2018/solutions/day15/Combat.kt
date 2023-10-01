@@ -15,31 +15,29 @@ class Combat(input: List<String>) {
     val maxY = grid.getMinMaxXY().x4
 
     fun run() {
-        var data = grid.getDataPoints().entries.groupingBy { it.key }.aggregate { _, _: CombatUnit?, element, _ -> CombatUnit(element.value)  }
+        val data = grid.getDataPoints().entries
+            .groupingBy { it.key }
+            .aggregate { _, _: CombatUnit?, element, _ -> CombatUnit(element.value)  }
+            .toMutableMap()
         while (true) {
-            val (outcome, nextRound) = doRound(data)
-            if (!outcome)
+            if (!doRound(data))
                 break
-            data = nextRound.toMap()
         }
     }
 
-    fun doRound(data: Map<Point,CombatUnit>): Pair<Boolean,Map<Point,CombatUnit>> {
-        val nextRoundData = data.toMutableMap()
-        for (y in grid.getMinMaxXY().x3 .. grid.getMinMaxXY().x4)
-            for (x in grid.getMinMaxXY().x1 .. grid.getMinMaxXY().x2) {
-                val thisUnitPosition = Point(x, y)
-                val thisUnit = data[thisUnitPosition] ?: continue
-                if (thisUnit.id == AreaId.WALL)
-                    continue
-                val targetUnitPositions = findTargetPostions(thisUnit.id, data).also { if (it.isEmpty()) return Pair(false, mapOf()) }
+    fun doRound(data: MutableMap<Point,CombatUnit>): Boolean {
+        //val nextRoundData = data.toMutableMap()
+        val allUnitsPositions = data.filterNot { e -> e.value.id == AreaId.WALL }.keys.sorted()
+        allUnitsPositions.forEach { thisUnitPosition ->
+                val thisUnit = data[thisUnitPosition] ?: return@forEach
+                val targetUnitPositions = findTargetPostions(thisUnit.id, data).also { if (it.isEmpty()) return false }
                 var targetInRangePosition: Point?
                 if (findTargetInRange(thisUnitPosition, targetUnitPositions).also { targetInRangePosition = it } != null)
-                    unitAttacks(thisUnit, targetInRangePosition!!)
+                    unitAttacks(thisUnit, targetInRangePosition!!, data)
                 else
-                    unitMoves(thisUnitPosition, thisUnit, targetUnitPositions, data, nextRoundData)
+                    unitMoves(thisUnitPosition, thisUnit, targetUnitPositions, data)
             }
-        return Pair(true, nextRoundData)
+        return true
     }
 
     fun findTargetPostions(id: AreaId, data: Map<Point,CombatUnit>): List<Point> {
@@ -50,10 +48,10 @@ class Combat(input: List<String>) {
     fun findTargetInRange(thisPosition: Point, targetPositions: List<Point>) =
         targetPositions.sorted().firstOrNull { thisPosition.adjacent(false).contains(it) }
 
-    fun unitMoves(unitAPosition: Point, unitA: CombatUnit, enemyUnitsPositions: List<Point>, data: Map<Point,CombatUnit>, nextRound: MutableMap<Point,CombatUnit>) {
+    fun unitMoves(unitAPosition: Point, unitA: CombatUnit, enemyUnitsPositions: List<Point>, data: MutableMap<Point,CombatUnit>) {
         val stepToNearestInRange = stepToNearestInRangePosition(unitAPosition, enemyUnitsPositions, data) ?: return
-        nextRound[stepToNearestInRange] = CombatUnit.fromUnit(unitA)
-        nextRound.remove(unitAPosition)
+        data[stepToNearestInRange] = CombatUnit.fromUnit(unitA)
+        data.remove(unitAPosition)
     }
 
     fun stepToNearestInRangePosition(unitAPosition: Point, enemyUnitsPositions: List<Point>, data: Map<Point,CombatUnit>): Point? {
@@ -62,22 +60,11 @@ class Combat(input: List<String>) {
             point.adjacent(false).forEach { adjPt -> if (data[adjPt] == null) points.add(adjPt) }
         }
         points = points.distinct().toMutableList()
+        if (DEBUG) { points.forEach { grid.setDataPoint(it, AreaId.INRANGE) } }
         val graph = setupGraph(data, unitAPosition)
-        if (DEBUG) {
-            points.forEach { p -> grid.setDataPoint(p, AreaId.INRANGE) }; grid.print()
-            println(Bfs<Point>().graphToString(graph, graph[unitAPosition]))
-        }
-        //val dijkstra = Dijkstra<Point>()
         val bfs = Bfs<Point>()
         val inRangeAndDistance = mutableListOf<Triple<Point,Int, Point>>()  // dest.point, distance, next step
         points.forEach { p ->
-            //val minPath: MinCostPath<Point>
-            /*try {
-                minPath = dijkstra.runIt(graph[unitAPosition], graph[p])
-                inRangeAndDistance.add(Triple(p, minPath.minCost, minPath.path[1].first))
-                if (DEBUG) grid.setDataPoint(p, AreaId.REACHABLE)
-            }
-            catch (_: Exception){}*/
             val minPath: List<Vertex<Point>>
             try {
                 minPath = bfs.shortestPath(graph[unitAPosition], graph[p])
@@ -88,12 +75,18 @@ class Combat(input: List<String>) {
         if (inRangeAndDistance.isEmpty())
             return null
         inRangeAndDistance.sortWith { p1,p2 -> if (p1.second == p2.second) p1.first.compareTo(p2.first) else p1.second.compareTo(p2.second) }
-        if (DEBUG) { grid.setDataPoint(inRangeAndDistance.first().first, AreaId.NEAREST); grid.print() }
+        if (DEBUG) {
+            inRangeAndDistance.forEach { grid.setDataPoint(it.first, AreaId.REACHABLE) }
+            grid.setDataPoint(inRangeAndDistance.first().first, AreaId.NEAREST)
+        }
         return inRangeAndDistance.first().third
     }
 
-    fun unitAttacks(attackUnit: CombatUnit, enemyPOsition: Point) {
-        // TODO
+    fun unitAttacks(attackUnit: CombatUnit, enemyPosition: Point, data: MutableMap<Point,CombatUnit>) {
+        val enemyUnit = data[enemyPosition]!!
+        enemyUnit.hitPoints -= attackUnit.attackPower
+        if (enemyUnit.hitPoints <= 0)
+            data.remove(enemyPosition)
     }
 
     fun setupGraph(data: Map<Point,CombatUnit>, start: Point): Graph<Point> {
