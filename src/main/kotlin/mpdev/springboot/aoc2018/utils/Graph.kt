@@ -12,6 +12,8 @@ class Graph<T>(var getConnections: (id: T) -> List<GraphNode<T>>? = { null } ) {
 
     fun getOrNull(id: T) = nodes[id]
 
+    fun nodeExists(id: T) = nodes[id] != null
+
     fun addNode(id: T) {
         nodes[id] = GraphNode(id) { nodeId -> getConnections(nodeId) }
     }
