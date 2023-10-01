@@ -15,28 +15,46 @@ class Combat(input: List<String>) {
     val maxY = grid.getMinMaxXY().x4
 
     fun run() {
-        val data = grid.getDataPoints().entries.groupingBy { it.key }.aggregate { _, _: CombatUnit?, element, _ -> CombatUnit(element.value)  }
-        while (true)
-            if(!doRound(data))
+        var data = grid.getDataPoints().entries.groupingBy { it.key }.aggregate { _, _: CombatUnit?, element, _ -> CombatUnit(element.value)  }
+        while (true) {
+            val (outcome, nextRound) = doRound(data)
+            if (!outcome)
                 break
+            data = nextRound.toMap()
+        }
     }
 
-    fun doRound(data: Map<Point,CombatUnit>): Boolean {
+    fun doRound(data: Map<Point,CombatUnit>): Pair<Boolean,Map<Point,CombatUnit>> {
+        val nextRoundData = data.toMutableMap()
         for (x in grid.getMinMaxXY().x1 .. grid.getMinMaxXY().x2)
             for (y in grid.getMinMaxXY().x3 .. grid.getMinMaxXY().x4) {
                 val thisUnitPosition = Point(x, y)
-                val thisUnit = data[thisUnitPosition] ?: throw AocException("unit not found at ($x,$y)")
+                val thisUnit = data[thisUnitPosition] ?: continue
                 if (thisUnit.id == AreaId.WALL)
                     continue
-                val targetUnitPositions = findTargetPostions(thisUnit.id, data).also { if (it.isEmpty()) return false }
-                val stepToNearestInRange = stepToNearestInRangePosition(thisUnitPosition, targetUnitPositions, data) ?: return false
+                val targetUnitPositions = findTargetPostions(thisUnit.id, data).also { if (it.isEmpty()) return Pair(false, mapOf()) }
+                var targetInRangePosition: Point?
+                if (findTargetInRange(thisUnitPosition, targetUnitPositions).also { targetInRangePosition = it } != null)
+                    unitAttacks(thisUnit, targetInRangePosition!!)
+                else
+                    unitMoves(thisUnitPosition, thisUnit, targetUnitPositions, data, nextRoundData)
             }
-        return true
+
+        return Pair(true, nextRoundData)
     }
 
     fun findTargetPostions(id: AreaId, data: Map<Point,CombatUnit>): List<Point> {
         val targetId = if (id == AreaId.ELF) AreaId.GOBLIN else AreaId.ELF
         return data.entries.filter { e -> e.value.id == targetId }.map { it.key }
+    }
+
+    fun findTargetInRange(thisPosition: Point, targetPositions: List<Point>) =
+        targetPositions.sorted().firstOrNull { thisPosition.adjacent(false).contains(it) }
+
+    fun unitMoves(unitAPosition: Point, unitA: CombatUnit, enemyUnitsPositions: List<Point>, data: Map<Point,CombatUnit>, nextRound: MutableMap<Point,CombatUnit>) {
+        val stepToNearestInRange = stepToNearestInRangePosition(unitAPosition, enemyUnitsPositions, data) ?: return
+        nextRound[stepToNearestInRange] = CombatUnit.fromUnit(unitA)
+        nextRound.remove(unitAPosition)
     }
 
     fun stepToNearestInRangePosition(unitAPosition: Point, enemyUnitsPositions: List<Point>, data: Map<Point,CombatUnit>): Point? {
@@ -68,10 +86,14 @@ class Combat(input: List<String>) {
         return inRangeAndDistance.first().third
     }
 
+    fun unitAttacks(attackUnit: CombatUnit, enemyPOsition: Point) {
+        // TODO
+    }
+
     fun setupGraph(data: Map<Point,CombatUnit>, start: Point): Graph<Point> {
         val graph = Graph<Point>().also{ it.addNode(start)}
-        (minX..maxX).forEach { x ->
-            (minY..maxY).forEach { y ->
+        (minY..maxY).forEach { y ->
+            (minX..maxX).forEach { x ->
                 val point = Point(x, y)
                 if (data[point] == null)
                     graph.addNode(point)
@@ -82,7 +104,7 @@ class Combat(input: List<String>) {
     }
 
     private fun addNeighbours(graph: Graph<Point>) {
-        graph.getNodes().keys.forEach { point ->
+        graph.getNodes().keys.sorted().forEach { point ->
             point.adjacent(false).forEach { neighbour ->
                 if (graph.nodeExists(neighbour))
                     graph.connect(point, neighbour)
@@ -91,7 +113,11 @@ class Combat(input: List<String>) {
     }
 }
 
-data class CombatUnit(val id: AreaId, var attackPower: Int = 3, var hitPoints: Int = 200)
+data class CombatUnit(val id: AreaId, var attackPower: Int = 3, var hitPoints: Int = 200) {
+    companion object {
+        fun fromUnit(unit: CombatUnit) = CombatUnit(unit.id, unit.attackPower, unit.hitPoints)
+    }
+}
 
 enum class AreaId(val value: Char) {
     WALL('#'),

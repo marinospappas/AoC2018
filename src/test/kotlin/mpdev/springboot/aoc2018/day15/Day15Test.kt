@@ -5,6 +5,7 @@ import mpdev.springboot.aoc2018.solutions.day15.AreaId
 import mpdev.springboot.aoc2018.solutions.day15.Combat
 import mpdev.springboot.aoc2018.solutions.day15.CombatUnit
 import mpdev.springboot.aoc2018.solutions.day15.Day15
+import mpdev.springboot.aoc2018.utils.Grid
 import mpdev.springboot.aoc2018.utils.Point
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.*
@@ -60,6 +61,34 @@ class Day15Test {
         combat.grid.print()
         println(nextStep)
         assertThat(nextStep).isEqualTo(Point(2,1))
+    }
+
+    @Test
+    @Order(4)
+    fun `Units move towards Targets`() {
+        val thisInput = listOf(
+            "#########",
+            "#G..G..G#",
+            "#.......#",
+            "#.......#",
+            "#G..E..G#",
+            "#.......#",
+            "#.......#",
+            "#G..G..G#",
+            "#########"
+        )
+        Combat.DEBUG = false
+        val combat = Combat(thisInput)
+        combat.grid.print()
+        repeat(3) {
+            val data = combat.grid.getDataPoints().entries.groupingBy { it.key }
+                .aggregate { _, _: CombatUnit?, element, _ -> CombatUnit(element.value) }
+            val (result, nextRound) = combat.doRound(data)
+            combat.grid = Grid(nextRound.entries.groupingBy { it.key }
+                .aggregate { _, _: AreaId?, element, _ -> element.value.id }, AreaId.mapper, border = 0)
+            println("after ${it+1} round(s)")
+            combat.grid.print()
+        }
     }
 
     @Test
