@@ -26,8 +26,8 @@ class Combat(input: List<String>) {
 
     fun doRound(data: Map<Point,CombatUnit>): Pair<Boolean,Map<Point,CombatUnit>> {
         val nextRoundData = data.toMutableMap()
-        for (x in grid.getMinMaxXY().x1 .. grid.getMinMaxXY().x2)
-            for (y in grid.getMinMaxXY().x3 .. grid.getMinMaxXY().x4) {
+        for (y in grid.getMinMaxXY().x3 .. grid.getMinMaxXY().x4)
+            for (x in grid.getMinMaxXY().x1 .. grid.getMinMaxXY().x2) {
                 val thisUnitPosition = Point(x, y)
                 val thisUnit = data[thisUnitPosition] ?: continue
                 if (thisUnit.id == AreaId.WALL)
@@ -39,7 +39,6 @@ class Combat(input: List<String>) {
                 else
                     unitMoves(thisUnitPosition, thisUnit, targetUnitPositions, data, nextRoundData)
             }
-
         return Pair(true, nextRoundData)
     }
 
@@ -68,16 +67,23 @@ class Combat(input: List<String>) {
             points.forEach { p -> grid.setDataPoint(p, AreaId.INRANGE) }; grid.print()
             println(Bfs<Point>().graphToString(graph, graph[unitAPosition]))
         }
-        val dijkstra = Dijkstra<Point>()
+        //val dijkstra = Dijkstra<Point>()
+        val bfs = Bfs<Point>()
         val inRangeAndDistance = mutableListOf<Triple<Point,Int, Point>>()  // dest.point, distance, next step
         points.forEach { p ->
-            val minPath: MinCostPath<Point>
-            try {
+            //val minPath: MinCostPath<Point>
+            /*try {
                 minPath = dijkstra.runIt(graph[unitAPosition], graph[p])
                 inRangeAndDistance.add(Triple(p, minPath.minCost, minPath.path[1].first))
                 if (DEBUG) grid.setDataPoint(p, AreaId.REACHABLE)
             }
-            catch (_: Exception){}
+            catch (_: Exception){}*/
+            val minPath: List<Vertex<Point>>
+            try {
+                minPath = bfs.shortestPath(graph[unitAPosition], graph[p])
+                inRangeAndDistance.add(Triple(p, minPath.size, minPath[1].getId()))
+            }
+            catch (_: Exception) {}
         }
         if (inRangeAndDistance.isEmpty())
             return null
@@ -104,7 +110,7 @@ class Combat(input: List<String>) {
     }
 
     private fun addNeighbours(graph: Graph<Point>) {
-        graph.getNodes().keys.sorted().forEach { point ->
+        graph.getNodes().keys.forEach { point ->
             point.adjacent(false).forEach { neighbour ->
                 if (graph.nodeExists(neighbour))
                     graph.connect(point, neighbour)

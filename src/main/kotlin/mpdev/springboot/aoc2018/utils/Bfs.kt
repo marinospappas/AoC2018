@@ -2,7 +2,7 @@ package mpdev.springboot.aoc2018.utils
 
 import kotlin.math.min
 
-class Bfs<T> {
+class Bfs<T: Comparable<T>> {
 
     /**
      *  1  procedure BFS(G, root) is
@@ -56,7 +56,7 @@ class Bfs<T> {
             val lastNode = curPath.last()
             if (lastNode.getId() == b.getId())   // found path
                 return curPath
-            lastNode.getConnectedNodes().forEach { connection ->
+            lastNode.getConnectedNodes().sortedBy { it.getId() }.forEach { connection ->
                 if (!curPath.contains(connection)) {
                     val newPartialPath = curPath.toMutableList().also { it.add(connection) }
                     queue.add(newPartialPath)
