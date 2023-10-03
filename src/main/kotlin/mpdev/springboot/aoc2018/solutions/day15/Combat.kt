@@ -9,33 +9,43 @@ class Combat(input: List<String>) {
     }
 
     var grid = Grid(input, AreaId.mapper, border = 0)
+    private var battleData = grid.getDataPoints().entries
+        .groupingBy { it.key }
+        .aggregate { _, _: CombatUnit?, element, _ -> CombatUnit(element.value)  }
+        .toMutableMap()
+    private val numOfElfs = grid.countOf(AreaId.ELF)
     val minX = grid.getMinMaxXY().x1
     val maxX = grid.getMinMaxXY().x2
     val minY = grid.getMinMaxXY().x3
     val maxY = grid.getMinMaxXY().x4
 
-    fun run() {
-        val data = grid.getDataPoints().entries
-            .groupingBy { it.key }
-            .aggregate { _, _: CombatUnit?, element, _ -> CombatUnit(element.value)  }
-            .toMutableMap()
-        while (true) {
-            if (!doRound(data))
+    fun run(print: Boolean = true): Pair<Int,Int> {
+        var count = 0
+        while (++count > 0) {
+            if (!doRound(battleData))
                 break
         }
+        if (print) {
+            grid = Grid(battleData.entries.groupingBy { it.key }
+                .aggregate { _, _: AreaId?, element, _ -> element.value.id }, AreaId.mapper, border = 0)
+            println("after $count round(s)")
+            grid.print()
+            println(battleData.values.filterNot { it.id == AreaId.WALL }.sumOf { it.hitPoints })
+        }
+        return Pair(count-1, battleData.values.filterNot { it.id == AreaId.WALL }.sumOf { it.hitPoints })
     }
 
     fun doRound(data: MutableMap<Point,CombatUnit>): Boolean {
-        //val nextRoundData = data.toMutableMap()
         val allUnitsPositions = data.filterNot { e -> e.value.id == AreaId.WALL }.keys.sorted()
-        allUnitsPositions.forEach { thisUnitPosition ->
+        allUnitsPositions.forEach { point ->
+            var thisUnitPosition = point
                 val thisUnit = data[thisUnitPosition] ?: return@forEach
                 val targetUnitPositions = findTargetPostions(thisUnit.id, data).also { if (it.isEmpty()) return false }
                 var targetInRangePosition: Point?
+                if (findTargetInRange(thisUnitPosition, targetUnitPositions, data).also { targetInRangePosition = it } == null)
+                    thisUnitPosition = unitMoves(thisUnitPosition, thisUnit, targetUnitPositions, data) ?: return@forEach
                 if (findTargetInRange(thisUnitPosition, targetUnitPositions, data).also { targetInRangePosition = it } != null)
                     unitAttacks(thisUnit, targetInRangePosition!!, data)
-                else
-                    unitMoves(thisUnitPosition, thisUnit, targetUnitPositions, data)
             }
         return true
     }
@@ -45,7 +55,7 @@ class Combat(input: List<String>) {
         return data.entries.filter { e -> e.value.id == targetId }.map { it.key }
     }
 
-    fun findTargetInRange(thisPosition: Point, targetPositions: List<Point>, data: Map<Point,CombatUnit>): Point? {
+    private fun findTargetInRange(thisPosition: Point, targetPositions: List<Point>, data: Map<Point,CombatUnit>): Point? {
         val targets = targetPositions.filter { thisPosition.adjacent(false).contains(it) }.map { Pair(data[it]!!, it) }
         if (targets.isEmpty())
             return null
@@ -57,10 +67,11 @@ class Combat(input: List<String>) {
             .first()
     }
 
-    fun unitMoves(unitAPosition: Point, unitA: CombatUnit, enemyUnitsPositions: List<Point>, data: MutableMap<Point,CombatUnit>) {
-        val stepToNearestInRange = stepToNearestInRangePosition(unitAPosition, enemyUnitsPositions, data) ?: return
+    private fun unitMoves(unitAPosition: Point, unitA: CombatUnit, enemyUnitsPositions: List<Point>, data: MutableMap<Point,CombatUnit>): Point? {
+        val stepToNearestInRange = stepToNearestInRangePosition(unitAPosition, enemyUnitsPositions, data) ?: return null
         data[stepToNearestInRange] = CombatUnit.fromUnit(unitA)
         data.remove(unitAPosition)
+        return stepToNearestInRange
     }
 
     fun stepToNearestInRangePosition(unitAPosition: Point, enemyUnitsPositions: List<Point>, data: Map<Point,CombatUnit>): Point? {
@@ -91,7 +102,7 @@ class Combat(input: List<String>) {
         return inRangeAndDistance.first().third
     }
 
-    fun unitAttacks(attackUnit: CombatUnit, enemyPosition: Point, data: MutableMap<Point,CombatUnit>) {
+    private fun unitAttacks(attackUnit: CombatUnit, enemyPosition: Point, data: MutableMap<Point,CombatUnit>) {
         val enemyUnit = data[enemyPosition]!!
         enemyUnit.hitPoints -= attackUnit.attackPower
         if (enemyUnit.hitPoints <= 0)
@@ -118,6 +129,38 @@ class Combat(input: List<String>) {
                     graph.connect(point, neighbour)
             }
         }
+    }
+
+    /////////////// part 2
+
+    fun findMinElfAttackPwr(): Int {
+        val initialData = battleData.toMap()
+        var high = 256
+        var low = 0
+        while (true) {
+            battleData = initialData.toMutableMap()
+            val attackPower = (high + low) / 2
+            setElfsAttackPwr(attackPower, battleData)
+            val (rounds, hitPts) = run(false)
+            if (elfCount(battleData) == numOfElfs)
+                high = attackPower
+            else
+                low = attackPower
+            if (low + 1 >= high) {
+                grid = Grid(battleData.entries.groupingBy { it.key }
+                    .aggregate { _, _: AreaId?, element, _ -> element.value.id }, AreaId.mapper, border = 0)
+                println("attack power: $attackPower rounds: $rounds, hit points: $hitPts")
+                grid.print()
+                return rounds * hitPts
+            }
+        }
+    }
+
+    private fun elfCount(data: MutableMap<Point,CombatUnit>) = data.values.count { it.id == AreaId.ELF }
+
+    private fun setElfsAttackPwr(x: Int, data: MutableMap<Point,CombatUnit>) {
+        data.filter { (_,unit) -> unit.id == AreaId.ELF }.forEach { (_,unit) -> unit.attackPower = x }
+        data.forEach { (_,unit) -> unit.hitPoints = 200 }
     }
 }
 

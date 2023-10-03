@@ -125,23 +125,26 @@ class Day15Test {
                 break
             combat.grid = Grid(data.entries.groupingBy { it.key }
                 .aggregate { _, _: AreaId?, element, _ -> element.value.id }, AreaId.mapper, border = 0)
-            println("after ${++count} round(s)")
-            combat.grid.print()
-            data.filterNot { it.value.id == AreaId.WALL }.forEach { println(it) }
+            if (setOf(1, 2, 22, 23, 24, 25, 26, 27, 28, 46, 47).contains(++count)) {
+                println("after ${count} round(s)")
+                combat.grid.print()
+                data.filterNot { it.value.id == AreaId.WALL }.toSortedMap().forEach { println(it) }
+            }
         }
-        assertThat(count-1).isEqualTo(47)
+        assertThat(count).isEqualTo(47)
         assertThat(data.filterNot { it.value.id == AreaId.WALL }.values.sumOf { it.hitPoints }).isEqualTo(590)
     }
 
     @Test
     @Order(6)
     fun `Solves Part 1`() {
-        assertThat(puzzleSolver.solvePart1().result).isEqualTo("")
+        assertThat(puzzleSolver.solvePart1().result).isEqualTo("27730")
     }
 
     @Test
     @Order(7)
     fun `Solves Part 2`() {
-        assertThat(puzzleSolver.solvePart2().result).isEqualTo("")
+        puzzleSolver.initSolver()
+        assertThat(puzzleSolver.solvePart2().result).isEqualTo("4988")
     }
 }

@@ -26,7 +26,7 @@ class Bfs<T: Comparable<T>> {
     fun allPaths(a: Vertex<T>, b: Vertex<T>): List<List<Vertex<T>>> {
         val allPaths = mutableListOf<List<Vertex<T>>>()
         val queue = ArrayDeque<MutableList<Vertex<T>>>()
-        var curPath = mutableListOf<Vertex<T>>().also { it.add(a) }
+        var curPath = mutableListOf(a)
         queue.add(curPath)
         while (queue.isNotEmpty()) {
             curPath = queue.removeFirst()
@@ -49,7 +49,8 @@ class Bfs<T: Comparable<T>> {
      */
     fun shortestPath(a: Vertex<T>, b: Vertex<T>): List<Vertex<T>> {
         val queue = ArrayDeque<MutableList<Vertex<T>>>()
-        var curPath = mutableListOf<Vertex<T>>().also { it.add(a) }
+        var curPath = mutableListOf(a)
+        val visited = mutableSetOf(a)
         queue.add(curPath)
         while (queue.isNotEmpty()) {
             curPath = queue.removeFirst()
@@ -57,7 +58,8 @@ class Bfs<T: Comparable<T>> {
             if (lastNode.getId() == b.getId())   // found path
                 return curPath
             lastNode.getConnectedNodes().sortedBy { it.getId() }.forEach { connection ->
-                if (!curPath.contains(connection)) {
+                if (!curPath.contains(connection) && !visited.contains(connection)) {
+                    visited.add(connection)
                     val newPartialPath = curPath.toMutableList().also { it.add(connection) }
                     queue.add(newPartialPath)
                 }
