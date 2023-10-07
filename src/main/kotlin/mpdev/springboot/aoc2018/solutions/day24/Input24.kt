@@ -7,7 +7,7 @@ class Input24 {
     var immuneGrpId = 0
     var infectionGrpId = 0
 
-    fun processInput(input: List<String>, immuneSystem: MutableMap<Int,Army>, infection: MutableMap<Int,Army>) {
+    fun processInput(input: List<String>, immuneSystem: MutableList<Army>, infection: MutableList<Army>) {
         var state = 0
         input.forEach { line ->
             if (line.isEmpty())
@@ -24,7 +24,7 @@ class Input24 {
         }
     }
 
-    private fun processGroup(state: Int, line: String, immuneSystem: MutableMap<Int,Army>, infection: MutableMap<Int,Army>) {
+    private fun processGroup(state: Int, line: String, immuneSystem: MutableList<Army>, infection: MutableList<Army>) {
         // 148 units each with 31914 hit points (immune to radiation, cold, fire; weak to bludgeoning)
         //  with an attack that does 416 cold damage at initiative 4
         try {
@@ -35,9 +35,9 @@ class Input24 {
             val match1 = Regex(""" ?with an attack that does (\d+) ([a-z]+) damage at initiative (\d+)""").find(line1)
             val (damage, kindOfDamage, initiative) = match1!!.destructured
             if (state == 1)
-                immuneSystem[++immuneGrpId] = Army(GroupName.ImmuneSys, immuneGrpId, units.toInt(), hitPoints.toInt(), weak, immune, Pair(Immunity.fromString(kindOfDamage), damage.toInt()), initiative.toInt())
+                immuneSystem.add(Army(GroupName.ImmuneSys, immuneGrpId++, units.toInt(), hitPoints.toInt(), weak, immune, Pair(Immunity.fromString(kindOfDamage), damage.toInt()), initiative.toInt()))
             else
-                infection[++infectionGrpId] = Army(GroupName.Infection, infectionGrpId, units.toInt(), hitPoints.toInt(), weak, immune, Pair(Immunity.fromString(kindOfDamage), damage.toInt()), initiative.toInt())
+                infection.add(Army(GroupName.Infection, infectionGrpId++, units.toInt(), hitPoints.toInt(), weak, immune, Pair(Immunity.fromString(kindOfDamage), damage.toInt()), initiative.toInt()))
         }
         catch(e: Exception) {
             throw AocException("invalid line [$line]")
