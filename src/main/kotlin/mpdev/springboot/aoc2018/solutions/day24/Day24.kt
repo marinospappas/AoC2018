@@ -17,15 +17,23 @@ class Day24: PuzzleSolver() {
     }
 
     var result = 0
+    lateinit var immuneSystem: ImmuneSystem
 
     override fun initSolver(): Pair<Long,String> {
         val elapsed = measureTimeMillis {
+            immuneSystem = ImmuneSystem(inputData)
         }
         return Pair(elapsed, "milli-sec")
     }
 
     override fun solvePart1(): PuzzlePartSolution {
         val elapsed = measureTimeMillis {
+            while(immuneSystem.antibodies.count { it.value.numOfUnits > 0 } > 0 && immuneSystem.infection.count { it.value.numOfUnits > 0 } > 0) {
+                immuneSystem.reset()
+                immuneSystem.selectTargets()
+                immuneSystem.attack()
+            }
+            result = immuneSystem.antibodies.values.sumOf { it.numOfUnits } + immuneSystem.infection.values.sumOf { it.numOfUnits }
         }
         return PuzzlePartSolution(1, result.toString(), elapsed)
     }

@@ -4,62 +4,89 @@ import java.util.*
 
 class ImmuneSystem(input: List<String>) {
 
-    val immuneSystem = mutableListOf<Pair<Int,ImmuneGroup>>()
-    val infection = mutableListOf<Pair<Int,InfectionGroup>>()
+    val antibodies = mutableMapOf<Int,Army>()
+    val infection = mutableMapOf<Int,Army>()
 
     init {
-        processInput(input)
+        Input24.processInput(input, antibodies, infection)
+        antibodies.forEach { it.value.enemy = infection }
+        infection.forEach { it.value.enemy = antibodies }
     }
 
-    private fun processInput(input: List<String>) {
-        var state = 0
-        input.forEach { line ->
-            if (line.isEmpty())
-                return@forEach
-            when (state) {
-                0 -> if (line == "Immune System:")
-                        ++state
-                1 -> if (line == "Infection:")
-                        ++state
-                    else
-                        processGroup(state, line)
-                2 -> processGroup(state, line)
+    fun selectTargets() {
+        val allUnits = mutableListOf<Army>().also { it.addAll(infection.values) }.also { it.addAll(antibodies.values) }
+        val groupA = allUnits.filter { it.numOfUnits > 0 }. sortedWith { u1, u2 ->
+            if (u2.effPwr() == u1.effPwr())
+                u2.initiative.compareTo(u1.initiative)
+            else
+                u2.effPwr().compareTo(u1.effPwr())
+        }
+        groupA.forEach {
+            grp -> grp.currentTarget = selectTgt(grp, grp.enemy.entries.filter { it.value.numOfUnits > 0 && !it.value.selectedAsTarget })
+            println("unit ${grp.name} select target ${grp.enemy[grp.currentTarget]}")
+            if (grp.currentTarget > 0)
+                grp.enemy[grp.currentTarget]!!.selectedAsTarget = true
+        }
+    }
 
+    fun reset() {
+        antibodies.forEach { it.value.selectedAsTarget = false; it.value.currentTarget = -1 }
+        infection.forEach { it.value.selectedAsTarget = false; it.value.currentTarget = -1 }
+    }
+
+    fun selectTgt(attackGrp: Army, enemy: List<Map.Entry<Int,Army>>): Int {
+        val enemySorted = enemy.sortedWith { e1, e2 ->
+            val damage1 = calcDamage(attackGrp, e1.value)
+            val damage2 = calcDamage(attackGrp, e2.value)
+            if (damage2 == damage1) {
+                if (e2.value.effPwr() == e1.value.effPwr())
+                    e2.value.initiative.compareTo(e1.value.initiative)
+                else
+                    (e2.value.effPwr()).compareTo(e1.value.effPwr())
+            }
+            else {
+                damage2.compareTo(damage1)
             }
         }
+        return if (enemySorted.isEmpty() || calcDamage(attackGrp, enemySorted.first().value) == 0) -1
+        else  enemySorted.first().key
     }
 
-    private fun processGroup(state: Int, line: String) {
-        // 148 units each with 31914 hit points (immune to radiation, cold, fire; weak to bludgeoning)
-        //  with an attack that does 416 cold damage at initiative 4
-        val match = Regex("""(\d+) units each with (\d+) hit points (.+)""").find(line)
-        val (units, hitPoints, remaining) = match!!.destructured
-        val (weak, immune) = processWeakImmune(remaining)
-        val line1 = if (remaining.first() == '(')
-            remaining.replace(Regex("""\(.*\)"""), "")
-        else
-            remaining
-        val match1 = Regex(""" with an attack that does (\d+) ([a-z]+) damage at initiative (\d+)""").find(line1)
-        val (damage, kindOfDamage, initiative) = match1!!.destructured
-        if (state == 1)
-            immuneSystem.add(Pair(units.toInt(), ImmuneGroup(hitPoints.toInt(), weak, immune, Pair(Immunity.fromString(kindOfDamage), damage.toInt()), initiative.toInt())))
-        else
-            infection.add(Pair(units.toInt(), InfectionGroup(hitPoints.toInt(), weak, immune, Pair(Immunity.fromString(kindOfDamage), damage.toInt()), initiative.toInt())))
+    fun calcDamage(attackGrp: Army, defendGrp: Army): Int {
+        if (defendGrp.immuneTo.contains(attackGrp.inflictsDamage.first))
+            return 0
+        val damage = attackGrp.numOfUnits * attackGrp.inflictsDamage.second
+        return if (defendGrp.weakTo.contains(attackGrp.inflictsDamage.first))
+            damage * 2
+        else damage
     }
 
-    private fun processWeakImmune(s: String): Pair<List<Immunity>,List<Immunity>> {
-        val weak = mutableListOf<Immunity>()
-        val immune = mutableListOf<Immunity>()
-        if (s.first() == '(') {
-            //TODO weak/immune
-        }
-        return Pair(weak, immune)
+    fun attack() {
+        mutableListOf<Army>()
+            .also { it.addAll(antibodies.values) }
+            .also { it.addAll(infection.values) }
+            .filter { it.numOfUnits > 0 && it.currentTarget >= 0 }
+            .sortedBy { it.initiative }.reversed().forEach { unit ->
+                unitAttacks(unit, unit.enemy)
+            }
+    }
+
+    fun unitAttacks(unit: Army, enemyMap: Map<Int,Army>) {
+        val enemyUnit = enemyMap[unit.currentTarget]!!
+        val damage = calcDamage(unit, enemyUnit)
+        enemyUnit.numOfUnits -= damage / enemyUnit.hitPoints
+        if (enemyUnit.numOfUnits < 0)
+            enemyUnit.numOfUnits = 0
+        println("unit ${unit.name} attacks ${enemyUnit.name} and deals $damage damage - kills ${damage / enemyUnit.hitPoints} units (${enemyUnit.numOfUnits} left)")
     }
 }
 
-data class ImmuneGroup(var hitPoints: Int, val weakTo: List<Immunity>, val immuneTo: List<Immunity>, val inflictsDamage: Pair<Immunity,Int>, val initiative: Int)
-
-data class InfectionGroup(var hitPoints: Int, val weakTo: List<Immunity>, val immuneTo: List<Immunity>, val inflictsDamage: Pair<Immunity,Int>, val initiative: Int)
+data class Army(var name: String, var numOfUnits: Int, var hitPoints: Int, val weakTo: List<Immunity>, val immuneTo: List<Immunity>, val inflictsDamage: Pair<Immunity,Int>, val initiative: Int) {
+    var currentTarget = -1
+    var selectedAsTarget = false
+    var enemy: Map<Int,Army> = emptyMap()
+    fun effPwr() = numOfUnits * inflictsDamage.second
+}
 
 enum class Immunity {
     Radiation,
