@@ -6,8 +6,8 @@ import kotlin.math.min
 class ImmuneSystem(input: List<String>) {
 
     var debug = false
-    val antibodies = mutableMapOf<Int,Army>()
-    val infection = mutableMapOf<Int,Army>()
+    var antibodies = mutableMapOf<Int,Army>()
+    var infection = mutableMapOf<Int,Army>()
 
     init {
         Input24().processInput(input, antibodies, infection)
@@ -32,13 +32,13 @@ class ImmuneSystem(input: List<String>) {
     }
 
     fun battle(): Pair<GroupName,Int> {
-        while(antibodies.count { it.value.numOfUnits > 0 } > 0 && infection.count { it.value.numOfUnits > 0 } > 0) {
+        while(antibodies.values.any { it.numOfUnits > 0 } && infection.values.any { it.numOfUnits > 0 }) {
             reset()
             selectTargets()
             attack()
         }
-        return Pair((antibodies + infection).values.first { it.numOfUnits > 0 }.name,
-            antibodies.values.sumOf { it.numOfUnits } + infection.values.sumOf { it.numOfUnits })
+        return Pair((antibodies.values + infection.values).first { it.numOfUnits > 0 }.name,
+            (antibodies.values + infection.values).sumOf { it.numOfUnits })
     }
 
     fun reset() {
@@ -67,7 +67,7 @@ class ImmuneSystem(input: List<String>) {
     fun calcDamage(attackGrp: Army, defendGrp: Army): Int {
         if (defendGrp.immuneTo.contains(attackGrp.inflictsDamage.first))
             return 0
-        val damage = attackGrp.numOfUnits * attackGrp.inflictsDamage.second
+        val damage = attackGrp.effPwr()
         return if (defendGrp.weakTo.contains(attackGrp.inflictsDamage.first))
             damage * 2
         else damage
@@ -84,11 +84,41 @@ class ImmuneSystem(input: List<String>) {
     }
 
     private fun unitAttacks(unit: Army, enemyMap: Map<Int,Army>) {
+        if (unit.numOfUnits <= 0)   // check in case this group's units have been killed in the meantime
+            return
         val enemyUnit = enemyMap[unit.currentTarget]!!
         val damage = calcDamage(unit, enemyUnit)
         val killUnits = min(calcDamage(unit, enemyUnit) / enemyUnit.hitPoints, enemyUnit.numOfUnits)
         enemyUnit.numOfUnits -= killUnits
         if (debug) println("unit ${unit.name}.${unit.id} attacks ${enemyUnit.name}.${unit.id} and deals $damage damage - killing $killUnits units (${enemyUnit.numOfUnits} left)")
+    }
+
+    ///////// part 2
+
+    fun tryBoost(): Triple<GroupName,Int,Int> {
+        var high = 3140
+        var low = 0
+        val origAntibodies = antibodies.toMap()
+        val origInfection = infection.toMap()
+        while (true) {
+            antibodies = origAntibodies.toMutableMap()
+            infection = origInfection.toMutableMap()
+            val boost = (high + low) / 2
+            boostImmuneUnits(boost)
+            val (winning, remUnits) = battle()
+            if (debug) println("immune boost of $boost: $winning won $remUnits units remaining")
+            if (winning == GroupName.ImmuneSys)
+                high = boost
+            else
+                low = boost
+            if (low + 1 >= high) {
+                return Triple(winning, remUnits, boost)
+            }
+        }
+    }
+
+    fun boostImmuneUnits(boost: Int) {
+        antibodies.values.forEach { it.boost = boost }
     }
 }
 
@@ -96,7 +126,8 @@ data class Army(var name: GroupName, var id: Int, var numOfUnits: Int, var hitPo
     var currentTarget = -1
     var selectedAsTarget = false
     var enemy: Map<Int,Army> = emptyMap()
-    fun effPwr() = numOfUnits * inflictsDamage.second
+    var boost = 0
+    fun effPwr() = numOfUnits * (inflictsDamage.second + boost)
 }
 
 enum class GroupName {

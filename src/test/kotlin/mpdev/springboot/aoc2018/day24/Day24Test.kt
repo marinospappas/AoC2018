@@ -116,6 +116,7 @@ class Day24Test {
     @Test
     @Order(7)
     fun `Solves Part 2`() {
+        puzzleSolver.immuneSystem.debug = true
         assertThat(puzzleSolver.solvePart2().result).isEqualTo("")
     }
 }

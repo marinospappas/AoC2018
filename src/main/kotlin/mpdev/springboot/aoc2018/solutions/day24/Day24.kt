@@ -37,6 +37,9 @@ class Day24: PuzzleSolver() {
 
     override fun solvePart2(): PuzzlePartSolution {
         val elapsed = measureTimeMillis {
+            val (winning, unitsLeft, minBoost) = immuneSystem.tryBoost()
+            log.info("part 2: $winning group won $unitsLeft units remaining")
+            result = minBoost
         }
         return PuzzlePartSolution(2, result.toString(), elapsed)
     }
