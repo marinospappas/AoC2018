@@ -88,7 +88,7 @@ class ImmuneSystem(input: List<String>) {
             return
         val enemyUnit = enemyMap[unit.currentTarget]
         val damage = calcDamage(unit, enemyUnit)
-        val killUnits = min(calcDamage(unit, enemyUnit) / enemyUnit.hitPoints, enemyUnit.numOfUnits)
+        val killUnits = min(damage / enemyUnit.hitPoints, enemyUnit.numOfUnits)
         enemyUnit.numOfUnits -= killUnits
         if (debug) println("unit ${unit.name}.${unit.id} attacks ${enemyUnit.name}.${unit.id} and deals $damage damage - killing $killUnits units (${enemyUnit.numOfUnits} left)")
     }
@@ -96,7 +96,7 @@ class ImmuneSystem(input: List<String>) {
     ///////// part 2
 
     fun findMinBoost(): Triple<GroupName,Int,Int> {
-        var high = 8192
+        var high = 84
         var low = 0
         val origAntibodies = antibodies.map { it.clone() }
         val origInfection = infection.map { it.clone() }
@@ -111,6 +111,7 @@ class ImmuneSystem(input: List<String>) {
                 val (winningFinal, remUnitsFinal) = tryBoost(high, origAntibodies, origInfection)
                 return Triple(winningFinal, remUnitsFinal, high)
             }
+            readln()
         }
     }
 
