@@ -72,6 +72,7 @@ class Day24Test {
         assertThat(damage12).isEqualTo(153238)
         assertThat(damage21).isEqualTo(24725)
 
+        immuneSystem.resetTargets()
         immuneSystem.selectTargets()
 
         assertThat(immuneSystem.antibodies[0].currentTarget).isEqualTo(1)
@@ -117,6 +118,6 @@ class Day24Test {
     @Order(7)
     fun `Solves Part 2`() {
         puzzleSolver.immuneSystem.debug = true
-        assertThat(puzzleSolver.solvePart2().result).isEqualTo("1570")
+        assertThat(puzzleSolver.solvePart2().result).isEqualTo("51")
     }
 }

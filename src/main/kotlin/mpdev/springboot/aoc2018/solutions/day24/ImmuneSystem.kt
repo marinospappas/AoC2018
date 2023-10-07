@@ -19,10 +19,16 @@ class ImmuneSystem(input: List<String>) {
             selectTargets()
             if (antibodies.none { it.currentTarget >= 0 } && infection.none { it.currentTarget >= 0 })
                 break
+            val numOfUnitsBefore = (antibodies + infection).sumOf { it.numOfUnits }
             attack()
+            val numOfUnitsAfter = (antibodies + infection).sumOf { it.numOfUnits }
+            if (numOfUnitsBefore == numOfUnitsAfter)     // check for no more kills (draw)
+                break
         }
-        return Pair((antibodies + infection).first { it.numOfUnits > 0 }.name,
-            (antibodies + infection).sumOf { it.numOfUnits })
+        val winner = if ((antibodies + infection).filter { it.numOfUnits > 0 } .map { it.name }.distinct().size == 1)
+            (antibodies + infection).first { it.numOfUnits > 0 }.name
+        else GroupName.NA
+        return Pair(winner, (antibodies + infection).sumOf { it.numOfUnits })
     }
 
     fun resetTargets() {
@@ -96,7 +102,7 @@ class ImmuneSystem(input: List<String>) {
     ///////// part 2
 
     fun findMinBoost(): Triple<GroupName,Int,Int> {
-        var high = 84
+        var high = 4096
         var low = 0
         val origAntibodies = antibodies.map { it.clone() }
         val origInfection = infection.map { it.clone() }
@@ -111,7 +117,6 @@ class ImmuneSystem(input: List<String>) {
                 val (winningFinal, remUnitsFinal) = tryBoost(high, origAntibodies, origInfection)
                 return Triple(winningFinal, remUnitsFinal, high)
             }
-            readln()
         }
     }
 
@@ -139,7 +144,7 @@ data class Army(var name: GroupName, var id: Int, var numOfUnits: Int, var hitPo
 }
 
 enum class GroupName {
-    ImmuneSys, Infection
+    ImmuneSys, Infection, NA
 }
 
 enum class Immunity {
