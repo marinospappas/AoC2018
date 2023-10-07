@@ -28,12 +28,9 @@ class Day24: PuzzleSolver() {
 
     override fun solvePart1(): PuzzlePartSolution {
         val elapsed = measureTimeMillis {
-            while(immuneSystem.antibodies.count { it.value.numOfUnits > 0 } > 0 && immuneSystem.infection.count { it.value.numOfUnits > 0 } > 0) {
-                immuneSystem.reset()
-                immuneSystem.selectTargets()
-                immuneSystem.attack()
-            }
-            result = immuneSystem.antibodies.values.sumOf { it.numOfUnits } + immuneSystem.infection.values.sumOf { it.numOfUnits }
+            val (winning, unitsLeft) = immuneSystem.battle()
+            log.info("part 1: $winning group won")
+            result = unitsLeft
         }
         return PuzzlePartSolution(1, result.toString(), elapsed)
     }

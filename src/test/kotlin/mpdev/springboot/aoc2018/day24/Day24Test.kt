@@ -42,45 +42,75 @@ class Day24Test {
 
     @Test
     @Order(3)
-    fun `Calculates Damage Level`() {
+    fun `Calculates Damage Level and Selects Targets`() {
         val immuneSystem = ImmuneSystem(inputLines)
+        immuneSystem.debug = true
         immuneSystem.antibodies.forEach { println(it) }
         println()
         immuneSystem.infection.forEach { println(it) }
         println("\nselect targets")
+        var damage11 = immuneSystem.calcDamage(immuneSystem.infection[1]!!, immuneSystem.antibodies[1]!!)
+        var damage12 = immuneSystem.calcDamage(immuneSystem.infection[1]!!, immuneSystem.antibodies[2]!!)
+        var damage21 = immuneSystem.calcDamage(immuneSystem.infection[2]!!, immuneSystem.antibodies[1]!!)
+        var damage22 = immuneSystem.calcDamage(immuneSystem.infection[2]!!, immuneSystem.antibodies[2]!!)
+        println("Infection Group 1 would deal Immune Group 1 $damage11 damage")
+        println("Infection Group 1 would deal Immune Group 2 $damage12 damage")
+        println("Infection Group 2 would deal Immune Group 1 $damage21 damage")
+        println("Infection Group 2 would deal Immune Group 2 $damage22 damage")
+        assertThat(damage11).isEqualTo(185832)
+        assertThat(damage12).isEqualTo(185832)
+        assertThat(damage22).isEqualTo(107640)
+        damage11 = immuneSystem.calcDamage(immuneSystem.antibodies[1]!!, immuneSystem.infection[1]!!)
+        damage12 = immuneSystem.calcDamage(immuneSystem.antibodies[1]!!, immuneSystem.infection[2]!!)
+        damage21 = immuneSystem.calcDamage(immuneSystem.antibodies[2]!!, immuneSystem.infection[1]!!)
+        damage22 = immuneSystem.calcDamage(immuneSystem.antibodies[2]!!, immuneSystem.infection[2]!!)
+        println("Immune Group 1 would deal Infection Group 1 $damage11 damage")
+        println("Immune Group 1 would deal Infection Group 2 $damage12 damage")
+        println("Immune Group 2 would deal Infection Group 1 $damage21 damage")
+        println("Immune Group 2 would deal Infection Group 2 $damage22 damage")
+        assertThat(damage11).isEqualTo(76619)
+        assertThat(damage12).isEqualTo(153238)
+        assertThat(damage21).isEqualTo(24725)
+
         immuneSystem.selectTargets()
-        println()
-        immuneSystem.infection.forEach { println("infection group ${it.key} chooses immune group ${it.value.currentTarget}") }
-        immuneSystem.antibodies.forEach { println("immune group ${it.key} chooses infection group ${it.value.currentTarget}") }
+
+        assertThat(immuneSystem.antibodies[1]!!.currentTarget).isEqualTo(2)
+        assertThat(immuneSystem.antibodies[2]!!.currentTarget).isEqualTo(1)
+        assertThat(immuneSystem.infection[1]!!.currentTarget).isEqualTo(1)
+        assertThat(immuneSystem.infection[2]!!.currentTarget).isEqualTo(2)
     }
 
     @Test
     @Order(4)
-    fun `Simulates Attack Rounds`() {
+    fun `Simulates Battle`() {
         val immuneSystem = ImmuneSystem(inputLines)
+        immuneSystem.debug = true
         println("Initial")
         immuneSystem.antibodies.forEach { println(it) }
         immuneSystem.infection.forEach { println(it) }
         var count = 0
+        var unitsLeft = -1
         while(immuneSystem.antibodies.count { it.value.numOfUnits > 0 } > 0 && immuneSystem.infection.count { it.value.numOfUnits > 0 } > 0) {
             immuneSystem.reset()
             println()
-            println("***** round ${++count}")
+            println("** round ${++count}")
+            println("select target")
             immuneSystem.selectTargets()
+            println("attack")
             immuneSystem.attack()
             println("units left")
             immuneSystem.antibodies.forEach { println(it) }
             immuneSystem.infection.forEach { println(it) }
-            println("total units left = ${immuneSystem.antibodies.values.sumOf { it.numOfUnits } + immuneSystem.infection.values.sumOf { it.numOfUnits }}")
+            unitsLeft = immuneSystem.antibodies.values.sumOf { it.numOfUnits } + immuneSystem.infection.values.sumOf { it.numOfUnits }
+            println("total units left = $unitsLeft")
         }
-        val unitsLeft = immuneSystem.antibodies.values.sumOf { it.numOfUnits } + immuneSystem.infection.values.sumOf { it.numOfUnits }
-        println("total units left = $unitsLeft")
+        assertThat(unitsLeft).isEqualTo(5216)
     }
 
     @Test
     @Order(6)
     fun `Solves Part 1`() {
-        assertThat(puzzleSolver.solvePart1().result).isEqualTo("")
+        assertThat(puzzleSolver.solvePart1().result).isEqualTo("5216")
     }
 
     @Test
