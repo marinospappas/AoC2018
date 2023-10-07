@@ -134,7 +134,8 @@ class ImmuneSystem(input: List<String>) {
     }
 }
 
-data class Army(var name: GroupName, var id: Int, var numOfUnits: Int, var hitPoints: Int, val weakTo: List<Immunity>, val immuneTo: List<Immunity>, val inflictsDamage: Pair<Immunity,Int>, val initiative: Int) {
+data class Army(var name: GroupName, var id: Int, var numOfUnits: Int, var hitPoints: Int, val weakTo: List<Immunity>, val immuneTo: List<Immunity>,
+                val inflictsDamage: Pair<Immunity,Int>, val initiative: Int) {
     var currentTarget = -1
     var selectedAsTarget = false
     var enemy: List<Army> = emptyList()
