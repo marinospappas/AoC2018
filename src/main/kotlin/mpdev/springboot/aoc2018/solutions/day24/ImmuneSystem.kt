@@ -25,7 +25,7 @@ class ImmuneSystem(input: List<String>) {
             if (numOfUnitsBefore == numOfUnitsAfter)     // check for no more kills (draw)
                 break
         }
-        val winner = if ((antibodies + infection).filter { it.numOfUnits > 0 } .map { it.name }.distinct().size == 1)
+        val winner = if ((antibodies + infection).filter { it.numOfUnits > 0 }.map { it.name }.distinct().size == 1)
             (antibodies + infection).first { it.numOfUnits > 0 }.name
         else GroupName.NA
         return Pair(winner, (antibodies + infection).sumOf { it.numOfUnits })
@@ -38,7 +38,7 @@ class ImmuneSystem(input: List<String>) {
 
     fun selectTargets() {
         val allUnits = mutableListOf<Army>().also { it.addAll(infection) }.also { it.addAll(antibodies) }
-        val groupA = allUnits.filter { it.numOfUnits > 0 }. sortedWith { u1, u2 ->
+        val groupA = allUnits.filter { it.numOfUnits > 0 }.sortedWith { u1, u2 ->
             if (u2.effPwr() == u1.effPwr())
                 u2.initiative.compareTo(u1.initiative)
             else
@@ -120,7 +120,7 @@ class ImmuneSystem(input: List<String>) {
         }
     }
 
-    fun tryBoost(boost: Int, immuneArmy: List<Army>, infectionArmy: List<Army>): Pair<GroupName,Int> {
+    private fun tryBoost(boost: Int, immuneArmy: List<Army>, infectionArmy: List<Army>): Pair<GroupName,Int> {
         antibodies = immuneArmy.map { it.clone() }.toMutableList()
         infection = infectionArmy.map { it.clone() }.toMutableList()
         boostImmuneUnits(boost)
@@ -129,7 +129,7 @@ class ImmuneSystem(input: List<String>) {
         return Pair(winning, remUnits)
     }
 
-    fun boostImmuneUnits(boost: Int) {
+    private fun boostImmuneUnits(boost: Int) {
         antibodies.forEach { it.boost = boost }
     }
 }
